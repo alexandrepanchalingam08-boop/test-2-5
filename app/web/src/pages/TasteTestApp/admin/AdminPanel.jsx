@@ -1,0 +1,139 @@
+import { useState } from 'react';
+import { createSession, deleteSession, setActiveSession } from '../../../lib/db.js';
+import { TrashIcon } from '../../../components/icons.jsx';
+import ParticipantsTab from './ParticipantsTab.jsx';
+import TableTab from './TableTab.jsx';
+import ResultsTab from './ResultsTab.jsx';
+
+const TABS = [
+  { key: 'participants', label: 'Participants' },
+  { key: 'table', label: 'Tableau' },
+  { key: 'results', label: 'Résultats' },
+];
+
+function tabStyle(active) {
+  return {
+    flex: 1, textAlign: 'center', padding: '8px 0', fontSize: 13, cursor: 'pointer',
+    fontFamily: 'var(--font-heading)', borderRadius: 999,
+    background: active ? 'var(--color-accent)' : 'transparent',
+    color: active ? 'var(--color-bg)' : 'var(--color-text)',
+  };
+}
+
+export default function AdminPanel({ sessions, activeSession, refresh, onExit }) {
+  const [creating, setCreating] = useState(false);
+  const [newProductName, setNewProductName] = useState('');
+  const [tab, setTab] = useState('participants');
+  const [detailId, setDetailId] = useState(null);
+
+  const sessionOptions = [...sessions].reverse().map((s) => ({
+    id: s.id,
+    label: `${s.productName}${s.day ? ' — ' + s.day : ''}${s.isActive ? ' (Active)' : ''}`,
+  }));
+
+  const onSessionSelectChange = async (e) => {
+    const val = e.target.value;
+    if (val === '__new__') {
+      setCreating(true);
+      return;
+    }
+    setDetailId(null);
+    await setActiveSession(val);
+    await refresh();
+  };
+
+  const onCreateSession = async () => {
+    const name = newProductName.trim();
+    if (!name) return;
+    await createSession({ productName: name, storeName: activeSession?.storeName });
+    setCreating(false);
+    setNewProductName('');
+    setDetailId(null);
+    await refresh();
+  };
+
+  const onDeleteViewed = async () => {
+    if (sessions.length <= 1 || !activeSession) return;
+    const remaining = sessions.filter((s) => s.id !== activeSession.id);
+    await deleteSession(activeSession.id);
+    await setActiveSession(remaining[remaining.length - 1].id);
+    setDetailId(null);
+    await refresh();
+  };
+
+  if (!activeSession && !creating) {
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 10px', flex: 'none', display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 20, textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: 14, opacity: 0.75 }}>Aucun test pour le moment.</p>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>+ Nouvelle session</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 10px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <select
+          value={creating ? '__new__' : (activeSession?.id ?? '')}
+          onChange={onSessionSelectChange}
+          className="input"
+          style={{ flex: 1, fontFamily: 'var(--font-heading)', fontSize: 14 }}
+        >
+          <option value="__new__">+ Nouvelle session</option>
+          {sessionOptions.map((opt) => (
+            <option key={opt.id} value={opt.id}>{opt.label}</option>
+          ))}
+        </select>
+        {sessions.length > 1 && activeSession && (
+          <button
+            onClick={onDeleteViewed}
+            aria-label="Supprimer la session"
+            style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, flex: 'none' }}
+          >
+            <TrashIcon />
+          </button>
+        )}
+        <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
+      </div>
+
+      {creating && (
+        <div style={{ padding: '0 20px 10px', flex: 'none', display: 'flex', gap: 8 }}>
+          <input
+            className="input" type="text" placeholder="Nom du produit" value={newProductName}
+            onChange={(e) => setNewProductName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') onCreateSession(); }}
+            style={{ flex: 1 }}
+          />
+          <button className="btn btn-primary" onClick={onCreateSession} style={{ flex: 'none' }}>Créer</button>
+        </div>
+      )}
+
+      {activeSession && (
+        <>
+          <div style={{ padding: '0 20px 12px', flex: 'none' }}>
+            <div style={{ display: 'flex', gap: 4, background: 'var(--color-surface)', borderRadius: 999, padding: 4 }}>
+              {TABS.map((t) => (
+                <div key={t.key} onClick={() => { setTab(t.key); setDetailId(null); }} style={tabStyle(tab === t.key)}>
+                  {t.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflow: 'auto', padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {tab === 'participants' && (
+              <ParticipantsTab session={activeSession} refresh={refresh} detailId={detailId} setDetailId={setDetailId} />
+            )}
+            {tab === 'table' && <TableTab session={activeSession} refresh={refresh} />}
+            {tab === 'results' && <ResultsTab session={activeSession} />}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

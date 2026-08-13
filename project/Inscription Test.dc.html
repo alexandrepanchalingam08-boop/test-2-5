@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/organic-4ad3d72c-697d-4820-aa50-53d9d02fcacb/styles.css">
+<script src="_ds/organic-4ad3d72c-697d-4820-aa50-53d9d02fcacb/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+</helmet>
+<div style="min-height:100vh;background:var(--color-bg);padding:56px 24px;font-family:var(--font-body);display:flex;justify-content:center;--color-bg:#ffffff;--color-text:#1a1a1a;--color-accent:#e4032e;--color-accent-100:#fde3e6;--color-accent-300:#f7a9b3;--color-accent-600:#c40226;--color-accent-700:#a80220;--color-accent-800:#8c011a;--color-accent-900:#650113;--color-accent-2:#1a1a1a;--color-accent-2-100:#e8e8e8;--color-accent-2-300:#b5b5b5;--color-accent-2-800:#1a1a1a;--color-divider:#e5e5e5;--color-surface:#f7f7f7;--color-neutral-100:#f7f7f7;--color-neutral-200:#efefef;--color-neutral-300:#e2e2e2;--color-neutral-400:#c9c9c9;--font-heading:'Poppins',sans-serif">
+<div style="width:100%;max-width:640px;display:flex;flex-direction:column;gap:28px">
+
+<sc-if value="{{hasSession}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="tag tag-accent" style="align-self:flex-start">Inscription</span>
+<h1 style="margin:0">{{title}}</h1>
+<p style="margin:4px 0 0;font-size:14px;opacity:.7">Merci de vous inscrire dans l'un des créneaux ci-dessous.</p>
+</div>
+<button class="btn btn-ghost" onClick="{{openAdmin}}" style="flex:none;font-size:12px">Admin</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px">
+<sc-for list="{{slots}}" as="slot" hint-placeholder-count="3">
+<div class="card elev-sm" style="gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<span class="card-title">{{slot.label}}</span>
+<span class="tag {{slot.countTagClass}}">{{slot.countStr}}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{slot.spots}}" as="spot" hint-placeholder-count="4">
+<div style="{{spot.rowStyle}}">
+<sc-if value="{{spot.filled}}" hint-placeholder-val="{{false}}">
+<span style="font-size:14px">{{spot.name}}</span>
+<button onClick="{{spot.onRemove}}" aria-label="Retirer" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--color-divider);background:var(--color-bg);color:var(--color-text);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+</button>
+</sc-if>
+<sc-if value="{{spot.canRegister}}" hint-placeholder-val="{{true}}">
+<input class="input" type="text" placeholder="Votre nom" value="{{spot.draft}}" onChange="{{spot.onDraftChange}}" onKeyDown="{{spot.onKeyDown}}" style="flex:1;min-height:38px">
+<button class="btn btn-secondary" onClick="{{spot.onSubmit}}" style="height:38px;font-size:13px;flex:none">S'inscrire</button>
+</sc-if>
+<sc-if value="{{spot.needsSlotName}}" hint-placeholder-val="{{false}}">
+<span style="font-size:13px;opacity:.55;font-style:italic">Renseignez d'abord l'intitulé du créneau dans les réglages.</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{noSession}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+<span class="tag tag-accent">Inscription</span>
+<h1 style="margin:0">Aucun test actif</h1>
+<p style="margin:0;font-size:14px;opacity:.75">Créez d'abord un test depuis l'espace admin de l'app de dégustation, ou créez-en un ici.</p>
+<button class="btn btn-primary" onClick="{{openAdmin}}">Admin</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isGateOpen}}" hint-placeholder-val="{{false}}">
+<div class="dialog-backdrop" onClick="{{closeAdmin}}">
+<div class="dialog" onClick="{{stopClick}}">
+<span class="dialog-title">Accès administrateur</span>
+<div class="dialog-body" style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center">
+<p style="margin:0;font-size:13px;opacity:.7">Réservé à l'organisateur du test.</p>
+<input class="input" type="password" placeholder="Code d'accès" value="{{gateCode}}" onChange="{{onGateCodeChange}}" style="max-width:200px;text-align:center">
+<sc-if value="{{gateError}}" hint-placeholder-val="{{false}}"><span style="font-size:12px;color:var(--color-accent-700)">Code incorrect</span></sc-if>
+</div>
+<div class="dialog-actions">
+<button class="btn btn-secondary" onClick="{{closeAdmin}}">Annuler</button>
+<button class="btn btn-primary" onClick="{{onGateSubmit}}">Valider</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isAdminOpen}}" hint-placeholder-val="{{false}}">
+<div class="dialog-backdrop" onClick="{{closeAdmin}}">
+<div class="dialog" onClick="{{stopClick}}">
+<span class="dialog-title">Réglages du test</span>
+<div class="dialog-body" style="display:flex;flex-direction:column;gap:12px">
+<div class="field">
+<label for="admin-session">Test</label>
+<select id="admin-session" class="input" value="{{draftSessionId}}" onChange="{{onDraftSessionChange}}">
+<option value="__new__">+ Nouveau test</option>
+<sc-for list="{{sessionOptions}}" as="opt" hint-placeholder-count="2">
+<option value="{{opt.id}}">{{opt.label}}</option>
+</sc-for>
+</select>
+</div>
+<sc-if value="{{isNewSession}}" hint-placeholder-val="{{false}}">
+<div class="field">
+<label for="admin-product">Nom du produit</label>
+<input id="admin-product" class="input" type="text" value="{{draftProduct}}" onChange="{{onDraftProductChange}}">
+</div>
+</sc-if>
+<div class="field">
+<label for="admin-day">Date</label>
+<input id="admin-day" class="input" type="text" value="{{draftDay}}" onChange="{{onDraftDayChange}}">
+</div>
+<div class="field">
+<label for="admin-place">Lieu</label>
+<input id="admin-place" class="input" type="text" value="{{draftPlace}}" onChange="{{onDraftPlaceChange}}">
+</div>
+<sc-for list="{{draftSlotLabels}}" as="dl" hint-placeholder-count="3">
+<div class="field">
+<label>{{dl.labelText}}</label>
+<input class="input" type="text" value="{{dl.value}}" onChange="{{dl.onChange}}">
+</div>
+</sc-for>
+</div>
+<div class="dialog-actions">
+<button class="btn btn-secondary" onClick="{{closeAdmin}}">Annuler</button>
+<button class="btn btn-primary" onClick="{{saveAdmin}}">Enregistrer</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;spotsPerSlot&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:4,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:1,&quot;max&quot;:10,&quot;section&quot;:&quot;Comportement&quot;}}">
+// Shares its session store with "Taste Test App.dc.html" — same keys and schema,
+// so registrants here appear in that app's participant dropdown and admin views.
+class Component extends DCLogic {
+  SESSIONS_KEY = 'test2parmi5_sessions_v3';
+  SELECTED_SESSION_KEY = 'test2parmi5_selected_session_v1';
+
+  state = {
+    sessions: [], selectedSessionId: null, drafts: {},
+    isGateOpen: false, gateCode: '', gateError: false,
+    isAdminOpen: false, draftSessionId: null, draftProduct: '', draftDay: '', draftPlace: '', draftSlotLabels: ['', '', ''],
+  };
+  ADMIN_CODE = '2026';
+
+  componentDidMount() {
+    this.refreshFromStorage();
+    window.addEventListener('storage', this.onStorageEvent);
+    window.addEventListener('focus', this.refreshFromStorage);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('storage', this.onStorageEvent);
+    window.removeEventListener('focus', this.refreshFromStorage);
+  }
+  onStorageEvent = (e) => {
+    if (e.key === this.SESSIONS_KEY || e.key === this.SELECTED_SESSION_KEY) this.refreshFromStorage();
+  };
+  refreshFromStorage = () => {
+    let sessions = [];
+    try { sessions = JSON.parse(localStorage.getItem(this.SESSIONS_KEY) || '[]'); } catch (e) {}
+    let selectedSessionId = null;
+    try { selectedSessionId = localStorage.getItem(this.SELECTED_SESSION_KEY); } catch (e) {}
+    this.setState({ sessions, selectedSessionId });
+  };
+
+  getActiveSession() {
+    const s = this.state.sessions;
+    if (!s.length) return null;
+    return s.find(x => x.id === this.state.selectedSessionId) || s[s.length - 1];
+  }
+
+  persistSessions(sessions) {
+    try { localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(sessions)); } catch (e) {}
+  }
+  setActiveId(id) {
+    try { localStorage.setItem(this.SELECTED_SESSION_KEY, id); } catch (e) {}
+  }
+
+  genCode(used) {
+    let c;
+    do { c = String(Math.floor(100 + Math.random() * 900)); } while (used.has(c));
+    used.add(c);
+    return c;
+  }
+  genOrder() {
+    const minority = Math.random() < 0.5 ? 'A' : 'B';
+    const majority = minority === 'A' ? 'B' : 'A';
+    const order = [minority, minority, majority, majority, majority];
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return order;
+  }
+
+  setDraft(key, val) { this.setState(s => ({ drafts: { ...s.drafts, [key]: val } })); }
+
+  register(slotLabel, spotIndex) {
+    const session = this.getActiveSession();
+    if (!session) return;
+    const key = session.id + ':' + slotLabel + ':' + spotIndex;
+    const name = (this.state.drafts[key] || '').trim();
+    if (!name) return;
+    const spotsPerSlot = this.props.spotsPerSlot ?? 4;
+    const inSlot = session.participants.filter(p => p.creneau === slotLabel).length;
+    if (inSlot >= spotsPerSlot) return;
+    const used = new Set(session.participants.flatMap(p => p.codes));
+    const codes = [this.genCode(used), this.genCode(used), this.genCode(used), this.genCode(used), this.genCode(used)];
+    const participant = { name, creneau: slotLabel, codes, order: this.genOrder() };
+    const sessions = this.state.sessions.map(sess => sess.id === session.id
+      ? { ...sess, participants: [...sess.participants, participant] } : sess);
+    this.persistSessions(sessions);
+    this.setState({ sessions, drafts: { ...this.state.drafts, [key]: '' } });
+  }
+
+  removeParticipant(slotLabel, name) {
+    const session = this.getActiveSession();
+    if (!session) return;
+    const sessions = this.state.sessions.map(sess => sess.id === session.id
+      ? { ...sess, participants: sess.participants.filter(p => !(p.creneau === slotLabel && p.name === name)) }
+      : sess);
+    this.persistSessions(sessions);
+    this.setState({ sessions });
+  }
+
+  loadSessionIntoDraft(session) {
+    const slotLabels = session?.slotLabels ?? (this.props.slotLabels ?? '12h - 12h30, 12h30 - 13h, 13h - 13h30').split(',').map(x => x.trim());
+    return {
+      draftSessionId: session ? session.id : '__new__',
+      draftProduct: session?.productName ?? '',
+      draftDay: session?.day ?? this.props.day ?? '',
+      draftPlace: session?.place ?? this.props.place ?? '',
+      draftSlotLabels: [...slotLabels],
+    };
+  }
+  openAdmin = () => this.setState({ isGateOpen: true, gateCode: '', gateError: false });
+  closeAdmin = () => this.setState({ isGateOpen: false, isAdminOpen: false });
+  stopClick = (e) => e.stopPropagation();
+  onGateCodeChange = (e) => this.setState({ gateCode: e.target.value, gateError: false });
+  onGateSubmit = () => {
+    if (this.state.gateCode !== this.ADMIN_CODE) { this.setState({ gateError: true }); return; }
+    this.refreshFromStorage();
+    const session = this.getActiveSession();
+    this.setState({ isGateOpen: false, isAdminOpen: true, ...this.loadSessionIntoDraft(session) });
+  };
+  onDraftSessionChange = (e) => {
+    const id = e.target.value;
+    if (id === '__new__') {
+      this.setState({ draftSessionId: '__new__', draftProduct: '', draftDay: '', draftPlace: '', draftSlotLabels: ['', '', ''] });
+    } else {
+      const session = this.state.sessions.find(s => s.id === id);
+      this.setState(this.loadSessionIntoDraft(session));
+    }
+  };
+  onDraftProductChange = (e) => this.setState({ draftProduct: e.target.value });
+  onDraftDayChange = (e) => this.setState({ draftDay: e.target.value });
+  onDraftPlaceChange = (e) => this.setState({ draftPlace: e.target.value });
+  onDraftSlotLabelChange(i, val) {
+    this.setState(s => {
+      const list = [...s.draftSlotLabels];
+      list[i] = val;
+      return { draftSlotLabels: list };
+    });
+  }
+
+  saveAdmin = () => {
+    const productName = this.state.draftProduct.trim() || 'Produit à tester';
+    const patch = { productName, day: this.state.draftDay, place: this.state.draftPlace, slotLabels: [...this.state.draftSlotLabels] };
+    let sessions, activeId;
+    if (this.state.draftSessionId && this.state.draftSessionId !== '__new__') {
+      sessions = this.state.sessions.map(sess => sess.id === this.state.draftSessionId ? { ...sess, ...patch } : sess);
+      activeId = this.state.draftSessionId;
+    } else {
+      const session = { id: 's' + Date.now(), createdAt: Date.now(), storeName: this.state.draftPlace, participants: [], ...patch };
+      sessions = [...this.state.sessions, session];
+      activeId = session.id;
+    }
+    this.persistSessions(sessions);
+    this.setActiveId(activeId);
+    this.setState({ sessions, selectedSessionId: activeId, isAdminOpen: false });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const spotsPerSlot = this.props.spotsPerSlot ?? 4;
+    const session = this.getActiveSession();
+
+    const sessionOptions = [...s.sessions].reverse().map(sess => ({
+      id: sess.id, label: sess.productName,
+    }));
+    const isNewSession = !s.draftSessionId || s.draftSessionId === '__new__';
+
+    if (!session) {
+      return {
+        hasSession: false, noSession: true,
+        isGateOpen: s.isGateOpen, gateCode: s.gateCode, gateError: s.gateError,
+        onGateCodeChange: this.onGateCodeChange, onGateSubmit: this.onGateSubmit,
+        isAdminOpen: s.isAdminOpen, openAdmin: this.openAdmin, closeAdmin: this.closeAdmin, stopClick: this.stopClick,
+        sessionOptions, isNewSession,
+        draftSessionId: s.draftSessionId || '__new__', onDraftSessionChange: this.onDraftSessionChange,
+        draftProduct: s.draftProduct, onDraftProductChange: this.onDraftProductChange,
+        draftDay: s.draftDay, onDraftDayChange: this.onDraftDayChange,
+        draftPlace: s.draftPlace, onDraftPlaceChange: this.onDraftPlaceChange,
+        draftSlotLabels: s.draftSlotLabels.map((val, i) => ({
+          value: val, labelText: `Créneau ${i + 1}`, onChange: (e) => this.onDraftSlotLabelChange(i, e.target.value),
+        })),
+        saveAdmin: this.saveAdmin, slots: [],
+      };
+    }
+
+    const slotLabels = session.slotLabels ?? (this.props.slotLabels ?? '12h - 12h30, 12h30 - 13h, 13h - 13h30').split(',').map(x => x.trim());
+    const slots = slotLabels.map(label => {
+      const hasLabel = !!label && !!label.trim();
+      const list = session.participants.filter(p => p.creneau === label);
+      const full = list.length >= spotsPerSlot;
+      const spots = Array.from({ length: spotsPerSlot }).map((_, idx) => {
+        const p = list[idx];
+        const filled = !!p;
+        const key = session.id + ':' + label + ':' + idx;
+        return {
+          filled, empty: !filled, canRegister: !filled && hasLabel, needsSlotName: !filled && !hasLabel,
+          name: p ? p.name : '',
+          draft: s.drafts[key] || '',
+          onDraftChange: (e) => this.setDraft(key, e.target.value),
+          onKeyDown: (e) => { if (e.key === 'Enter') this.register(label, idx); },
+          onSubmit: () => this.register(label, idx),
+          onRemove: () => this.removeParticipant(label, p ? p.name : ''),
+          rowStyle: {
+            display: 'flex', alignItems: 'center', gap: 8, minHeight: 44,
+            padding: filled ? '8px 14px' : '0', borderRadius: 999,
+            background: filled ? 'var(--color-accent-100)' : 'transparent',
+            border: filled ? '1px solid var(--color-accent-300)' : 'none',
+            justifyContent: filled ? 'space-between' : 'flex-start',
+          },
+        };
+      });
+      return { label, countStr: `${list.length}/${spotsPerSlot}`, countTagClass: full ? 'tag-accent-2' : 'tag-neutral', spots };
+    });
+
+    return {
+      hasSession: true, noSession: false,
+      title: session.productName, day: session.day || '—', place: session.place || session.storeName || '—',
+      slots,
+      isGateOpen: s.isGateOpen, gateCode: s.gateCode, gateError: s.gateError,
+      onGateCodeChange: this.onGateCodeChange, onGateSubmit: this.onGateSubmit,
+      openAdmin: this.openAdmin, closeAdmin: this.closeAdmin, stopClick: this.stopClick,
+      isAdminOpen: s.isAdminOpen,
+      sessionOptions, isNewSession,
+      draftSessionId: s.draftSessionId || session.id, onDraftSessionChange: this.onDraftSessionChange,
+      draftProduct: s.draftProduct, onDraftProductChange: this.onDraftProductChange,
+      draftDay: s.draftDay, onDraftDayChange: this.onDraftDayChange,
+      draftPlace: s.draftPlace, onDraftPlaceChange: this.onDraftPlaceChange,
+      draftSlotLabels: s.draftSlotLabels.map((val, i) => ({
+        value: val, labelText: `Créneau ${i + 1}`, onChange: (e) => this.onDraftSlotLabelChange(i, e.target.value),
+      })),
+      saveAdmin: this.saveAdmin,
+    };
+  }
+}
+</script>
+</body>
+</html>

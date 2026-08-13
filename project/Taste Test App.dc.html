@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="./organic-styles.css">
+<script src="_ds/organic-4ad3d72c-697d-4820-aa50-53d9d02fcacb/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+@keyframes heartFloat { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-320px) scale(1.2); opacity: 0; } }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--color-surface);padding:48px;font-family:var(--font-body);--color-bg:#ffffff;--color-text:#1a1a1a;--color-accent:#e4032e;--color-accent-100:#fde3e6;--color-accent-300:#f7a9b3;--color-accent-600:#c40226;--color-accent-700:#a80220;--color-accent-800:#8c011a;--color-accent-900:#650113;--color-accent-2:#1a1a1a;--color-accent-2-100:#e8e8e8;--color-accent-2-300:#b5b5b5;--color-accent-2-800:#1a1a1a;--color-divider:#e5e5e5;--color-surface:#f7f7f7;--color-neutral-100:#f7f7f7;--color-neutral-200:#efefef;--color-neutral-300:#e2e2e2;--color-neutral-400:#c9c9c9;--font-heading:'Poppins',sans-serif">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402,874">
+<div style="height:100%;display:flex;flex-direction:column;background:var(--color-bg);color:var(--color-text);overflow:hidden">
+
+<sc-if value="{{showHeader}}" hint-placeholder-val="{{false}}">
+<div style="padding:60px 20px 0;flex:none">
+<div style="display:flex;align-items:center;gap:12px">
+<sc-if value="{{showBack}}" hint-placeholder-val="{{false}}">
+<button onClick="{{back}}" aria-label="Retour" style="width:36px;height:36px;border-radius:999px;border:1px solid var(--color-divider);background:var(--color-surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;color:var(--color-text);padding:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</button>
+</sc-if>
+<div style="flex:1;height:6px;border-radius:999px;background:var(--color-neutral-300);overflow:hidden">
+<div style="{{progressFillStyle}}"></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isGate}}" hint-placeholder-val="{{false}}">
+<div style="height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:40px 24px">
+<span style="font-family:var(--font-heading);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent-700)">Accès réservé</span>
+<h2 style="margin:0">Espace administrateur</h2>
+<p style="margin:0;font-size:13px;opacity:.7;max-width:240px">Réservé à l'organisateur du test.</p>
+<input class="input" type="password" placeholder="Code d'accès" value="{{gateCode}}" onChange="{{onGateCodeChange}}" style="margin-top:10px;max-width:200px;text-align:center">
+<sc-if value="{{gateError}}" hint-placeholder-val="{{false}}"><span style="font-size:12px;color:var(--color-accent-700)">Code incorrect</span></sc-if>
+<button class="btn btn-primary" onClick="{{onGateSubmit}}" style="margin-top:6px">Valider</button>
+<button class="btn btn-ghost" onClick="{{exitGate}}" style="font-size:12px">Retour au test</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isAdmin}}" hint-placeholder-val="{{false}}">
+<div style="height:100%;display:flex;flex-direction:column">
+<div style="padding:56px 20px 10px;flex:none;display:flex;align-items:center;gap:8px">
+<select value="{{adminSessionSelectValue}}" onChange="{{onAdminSessionSelectChange}}" class="input" style="flex:1;font-family:var(--font-heading);font-size:14px">
+<option value="__new__">+ Nouvelle session</option>
+<sc-for list="{{sessionOptions}}" as="opt" hint-placeholder-count="2">
+<option value="{{opt.id}}">{{opt.label}}</option>
+</sc-for>
+</select>
+<sc-if value="{{canDeleteViewed}}" hint-placeholder-val="{{false}}">
+<button onClick="{{onDeleteViewed}}" aria-label="Supprimer la session" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--color-divider);background:var(--color-surface);color:var(--color-text);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>
+</button>
+</sc-if>
+<button class="btn btn-secondary" onClick="{{exitGate}}" style="height:36px;font-size:12px;flex:none">Quitter</button>
+</div>
+
+<sc-if value="{{adminCreatingSession}}" hint-placeholder-val="{{false}}">
+<div style="padding:0 20px 10px;flex:none;display:flex;gap:8px">
+<input class="input" type="text" placeholder="Nom du produit" value="{{newSessionProductName}}" onChange="{{onNewSessionProductNameChange}}" style="flex:1">
+<button class="btn btn-primary" onClick="{{onCreateSession}}" style="flex:none">Créer</button>
+</div>
+</sc-if>
+
+<div style="padding:0 20px 12px;flex:none;display:flex;gap:4px;background:var(--color-surface);border-radius:999px;padding:4px">
+<div onClick="{{showSessionsTab}}" style="{{sessionsTabStyle}}">Participants</div>
+<div onClick="{{showTableTab}}" style="{{tableTabStyle}}">Tableau</div>
+<div onClick="{{showResultsTab}}" style="{{resultsTabStyle}}">Résultats</div>
+</div>
+
+<div style="flex:1;overflow:auto;padding:0 20px 24px;display:flex;flex-direction:column;gap:16px">
+
+<sc-if value="{{isAdminTabSessions}}" hint-placeholder-val="{{true}}">
+
+<sc-if value="{{isAdminDetail}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<button onClick="{{closeAdminDetail}}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--color-accent-700);font-size:13px;cursor:pointer;padding:0">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+Participants
+</button>
+<div class="card elev-sm" style="gap:10px">
+<span class="card-title" style="font-size:19px">{{adminDetail.name}}</span>
+<span style="font-size:11px;opacity:.6">{{adminDetail.creneau}}</span>
+<div style="font-size:13px;opacity:.8">Codes : {{adminDetail.codesStr}}</div>
+<span class="tag tag-accent-2" style="align-self:flex-start">Groupe de 2 (vérité) : {{adminDetail.truth2Str}}</span>
+<div style="height:1px;background:var(--color-divider);margin:4px 0"></div>
+<sc-if value="{{adminDetail.hasSubmission}}" hint-placeholder-val="{{false}}">
+<div style="font-size:13px">Bloc de 2 (réponse) : {{adminDetail.answerStr}}</div>
+<div style="font-size:13px">Bloc de 3 (réponse) : {{adminDetail.bloc3Str}}</div>
+<span style="{{adminDetail.resultTagStyle}}">{{adminDetail.resultLabel}}</span>
+<div style="font-size:13px">Intensité perçue : {{adminDetail.intensityStr}}</div>
+<div style="font-size:14px;line-height:1.6;font-style:italic;opacity:.85">« {{adminDetail.description}} »</div>
+</sc-if>
+<sc-if value="{{adminDetailNoSubmission}}" hint-placeholder-val="{{false}}">
+<span style="font-size:13px;opacity:.6">Ce participant n'a pas encore répondu.</span>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isAdminList}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55">Correspondances — {{viewedProductName}}</span>
+<sc-for list="{{adminRows}}" as="row" hint-placeholder-count="4">
+<div class="card elev-sm" style="gap:8px;cursor:pointer" onClick="{{row.onOpen}}">
+<div style="display:flex;justify-content:space-between;align-items:baseline">
+<span class="card-title">{{row.name}}</span>
+<span style="font-size:11px;opacity:.55">{{row.creneau}}</span>
+</div>
+<div style="font-size:12px;opacity:.7">Codes : {{row.codesStr}}</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<span class="tag tag-accent-2">Groupe de 2 (vérité) : {{row.truth2Str}}</span>
+</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+<span class="tag tag-neutral">Réponse : {{row.answerStr}}</span>
+<span style="{{row.resultTagStyle}}">{{row.resultLabel}}</span>
+</div>
+<sc-if value="{{row.hasSubmission}}" hint-placeholder-val="{{false}}">
+<div style="font-size:12px;opacity:.7">Intensité : {{row.intensityStr}}</div>
+<div style="font-size:12px;opacity:.7;font-style:italic">« {{row.description}} »</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+</sc-if>
+
+<sc-if value="{{isAdminTabTable}}" hint-placeholder-val="{{false}}">
+<span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55">{{viewedProductName}} — table de codage</span>
+<div style="overflow-x:auto">
+<table class="table" style="min-width:340px">
+<thead><tr><th>#</th><th>Nom</th><th>Créneau</th><th>Ordre</th></tr></thead>
+<tbody>
+<sc-for list="{{tableRows}}" as="r" hint-placeholder-count="12">
+<tr><td>{{r.num}}</td><td><input class="input" type="text" value="{{r.name}}" onChange="{{r.onNameChange}}" style="min-height:28px;padding:3px 8px;font-size:12px;min-width:110px"></td><td><input class="input" type="text" value="{{r.creneau}}" onChange="{{r.onCreneauChange}}" style="min-height:28px;padding:3px 8px;font-size:12px;min-width:100px"></td><td style="font-family:monospace;display:flex;gap:6px"><sc-for list="{{r.orderChips}}" as="oc" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="{{oc.style}}">{{oc.letter}}</span><span style="{{oc.codeStyle}}">{{oc.code}}</span></div></sc-for></td></tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</sc-if>
+
+<sc-if value="{{isAdminTabResults}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0 4px">
+<span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55">{{viewedProductName}} — bonnes réponses</span>
+<div style="{{resultsBadgeStyle}}"><span style="font-family:var(--font-heading);font-size:24px">{{correctCount}}/{{totalParticipants}}</span></div>
+</div>
+<sc-if value="{{hasAvgIntensity}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:-8px">
+<span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55">Intensité moyenne perçue</span>
+<span style="font-family:var(--font-heading);font-size:20px;font-weight:700">{{avgIntensityStr}}/100</span>
+</div>
+</sc-if>
+<sc-if value="{{hasKeywords}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+<span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55">Mots-clés fréquents</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{keywordChips}}" as="kw" hint-placeholder-count="6">
+<span class="tag tag-accent">{{kw.word}} ({{kw.count}})</span>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isParticipantFlow}}" hint-placeholder-val="{{true}}">
+<div style="flex: 1; overflow: auto; padding: 0 20px 8px; position: relative">
+
+<sc-if value="{{isStep0}}" hint-placeholder-val="{{true}}">
+<div style="height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:40px 8px">
+<span style="font-family: var(--font-heading); font-size: 28px; color: var(--color-accent-700); text-align: center">{{activeProductName}}</span>
+<span style="font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .6; margin-top: -12px; text-align: center">{{activeDay}}</span>
+<h1 style="margin: 0; font-size: 12px; line-height: 1.15; text-align: center">Test de discrimination<br>2 parmi 5</h1>
+<p style="margin:0;font-size:14px;line-height:1.6;opacity:.75;max-width:280px">Sélectionnez votre nom pour commencer.</p>
+<div class="field" style="margin-top:6px">
+<label for="name-select">Votre nom</label>
+<select id="name-select" class="input" value="{{selectedName}}" onChange="{{onNameChange}}">
+<option value="">Choisissez votre nom</option>
+<sc-for list="{{nameOptions}}" as="n" hint-placeholder-count="5">
+<option value="{{n}}">{{n}}</option>
+</sc-for>
+</select>
+</div>
+<button class="btn btn-ghost" onClick="{{enterGate}}" style="align-self:flex-start;font-size:12px;padding-inline:0;margin-top:2px">Accès administrateur</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isStep1}}" hint-placeholder-val="{{false}}">
+<div style="padding-top:20px;display:flex;flex-direction:column;gap:14px">
+<span class="tag tag-accent" style="align-self:flex-start">Protocole</span>
+<h2 style="margin:0">Comment se déroule ce test</h2>
+<p style="margin:0;font-size:14px;line-height:1.6;opacity:.85">5 échantillons vous sont présentés. Répartissez-les en deux groupes : un groupe de 2 échantillons identiques, un groupe de 3 échantillons identiques. Donnez obligatoirement une réponse.</p>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+<sc-for list="{{protocolSteps}}" as="p" hint-placeholder-count="3">
+<div style="display:flex;align-items:flex-start;gap:12px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 14px">
+<span style="width:26px;height:26px;border-radius:50%;background:var(--color-accent-2);color:var(--color-bg);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:13px;flex:none">{{p.n}}</span>
+<span style="font-size:13.5px;line-height:1.5;padding-top:3px">{{p.text}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isStep2}}" hint-placeholder-val="{{false}}">
+<div style="padding-top:20px;display:flex;flex-direction:column;gap:14px">
+<span class="tag tag-accent" style="align-self:flex-start">Vos échantillons</span>
+<h2 style="margin:0">5 échantillons vous sont attribués</h2>
+<p style="margin:0;font-size:14px;opacity:.75">Dégustez-les dans l'ordre de votre choix.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+<sc-for list="{{sampleCards}}" as="sample" hint-placeholder-count="5">
+<div class="card elev-sm" style="align-items:center;text-align:center;padding:20px 8px">
+<span style="font-family:var(--font-heading);font-size:26px">{{sample.code}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isStep3}}" hint-placeholder-val="{{false}}">
+<div style="padding-top:20px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center">
+<span class="tag tag-accent">Regroupement</span>
+<h2 style="margin:10px 0 2px">Classez les échantillons en 2 groupes</h2>
+<p style="margin:0 0 10px;font-size:14px;opacity:.7">Faites glisser chaque code vers un bloc, selon leur ressemblance perçue.</p>
+<div ref="{{poolRef}}" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;min-height:56px;width:100%">
+<sc-for list="{{poolChips}}" as="chip" hint-placeholder-count="5">
+<div onPointerDown="{{chip.onPointerDown}}" style="{{chip.style}}">{{chip.code}}</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:20px;width:100%;align-items:center">
+<div style="width:100%">
+<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:8px;text-align:center">Bloc de 2</div>
+<div ref="{{block2Ref}}" style="{{blockStyle}}">
+<sc-for list="{{b2Chips}}" as="chip" hint-placeholder-count="0">
+<div onPointerDown="{{chip.onPointerDown}}" style="{{chip.style}}">{{chip.code}}</div>
+</sc-for>
+<sc-for list="{{b2Empty}}" as="slot" hint-placeholder-count="2">
+<div style="{{emptySlotStyle}}"></div>
+</sc-for>
+</div>
+</div>
+<div style="width:100%">
+<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:8px;text-align:center">Bloc de 3</div>
+<div ref="{{block3Ref}}" style="{{blockStyle}}">
+<sc-for list="{{b3Chips}}" as="chip" hint-placeholder-count="0">
+<div onPointerDown="{{chip.onPointerDown}}" style="{{chip.style}}">{{chip.code}}</div>
+</sc-for>
+<sc-for list="{{b3Empty}}" as="slot" hint-placeholder-count="3">
+<div style="{{emptySlotStyle}}"></div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isDragging}}" hint-placeholder-val="{{false}}">
+<div style="{{floatingChipStyle}}">{{draggingCode}}</div>
+</sc-if>
+
+<sc-if value="{{isStep4}}" hint-placeholder-val="{{false}}">
+<div style="padding-top:20px;display:flex;flex-direction:column;gap:6px">
+<span class="tag tag-accent" style="align-self:flex-start">Intensité</span>
+<h2 style="margin:10px 0 2px">Quelle est l'intensité de la différence perçue ?</h2>
+<p style="margin:0 0 20px;font-size:14px;opacity:.7">Entre le groupe de 2 et le groupe de 3.</p>
+<input type="range" min="0" max="100" value="{{intensity}}" onChange="{{onIntensityChange}}" style="width:100%;accent-color:var(--color-accent);height:24px">
+<div style="display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin-top:4px">
+<span>Très faible</span>
+<span>Moyenne</span>
+<span>Très forte</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isStep5}}" hint-placeholder-val="{{false}}">
+<div style="padding-top: 20px; display: flex; flex-direction: column; gap: 6px; position: relative">
+<span class="tag tag-accent" style="align-self:flex-start">Description</span>
+<h2 style="margin:10px 0 2px">Qu'avez-vous perçu ?</h2>
+<p style="margin:0 0 4px;font-size:14px;opacity:.7">Décrivez la nature de la différence perçue et la ou les composante(s) du {{productName}} qu'elle affecte.</p>
+
+</div><textarea class="input" rows="6" placeholder="Décrivez votre perception ici…" value="{{description}}" onChange="{{onDescriptionChange}}" style="margin-top: 14px; text-align: center; width: 100%; max-width: 100%; box-sizing: border-box; overflow-wrap: break-word; word-break: break-word; white-space: pre-wrap; resize: none; background-color: var(--color-neutral-300); border-radius: 50%; padding: 40px 30px"></textarea>
+</sc-if>
+
+<sc-if value="{{isStep6}}" hint-placeholder-val="{{false}}">
+<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:40px 16px;position:relative;overflow:hidden">
+<sc-for list="{{hearts}}" as="heart" hint-placeholder-count="8">
+<span style="{{heart.style}}">❤️</span>
+</sc-for>
+<span style="{{resultBadgeStyle}}">{{resultBadgeLabel}}</span>
+<div style="width:64px;height:64px;border-radius:50%;background:var(--color-accent-2);display:flex;align-items:center;justify-content:center;color:var(--color-bg);flex:none">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+</div>
+<h2 style="margin:0">Merci pour votre participation</h2>
+<p style="margin:0;font-size:14px;opacity:.75;max-width:260px">Vos réponses ont été enregistrées pour l'analyse du panel.</p>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{showCta}}" hint-placeholder-val="{{true}}">
+<div style="padding:14px 20px 30px;flex:none">
+<button class="btn btn-primary btn-block" onClick="{{next}}" disabled="{{ctaDisabled}}" style="height:50px;font-size:15px;margin-top:0">{{ctaLabel}}</button>
+</div>
+</sc-if>
+
+</sc-if>
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;skipValidation&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Comportement&quot;}}">
+class Component extends DCLogic {
+  // Admin-only data — never expose sessions/correspondences as a tweak/prop.
+  SESSIONS_KEY = 'test2parmi5_sessions_v3';
+  SUBMISSIONS_KEY = 'test2parmi5_submissions_v3';
+  SELECTED_SESSION_KEY = 'test2parmi5_selected_session_v1';
+  NAME_TEMPLATE = [
+    { name: 'Participant 1', creneau: 'Créneau 1' }, { name: 'Participant 2', creneau: 'Créneau 1' },
+    { name: 'Participant 3', creneau: 'Créneau 1' }, { name: 'Participant 4', creneau: 'Créneau 1' },
+    { name: 'Participant 5', creneau: 'Créneau 2' }, { name: 'Participant 6', creneau: 'Créneau 2' },
+    { name: 'Participant 7', creneau: 'Créneau 2' }, { name: 'Participant 8', creneau: 'Créneau 2' },
+    { name: 'Participant 9', creneau: 'Créneau 3' }, { name: 'Participant 10', creneau: 'Créneau 3' },
+    { name: 'Participant 11', creneau: 'Créneau 3' }, { name: 'Participant 12', creneau: 'Créneau 3' },
+  ];
+
+  buildSeedSession() {
+    return {
+      id: 'seed', productName: 'burger', storeName: 'Giant', createdAt: new Date('2026-01-20').getTime(),
+      participants: [
+        { name: 'Participant 1', creneau: 'Créneau 1', codes: ['451', '750', '988', '223', '677'], order: ['A', 'A', 'B', 'B', 'B'] },
+        { name: 'Participant 2', creneau: 'Créneau 1', codes: ['246', '206', '711', '605', '439'], order: ['A', 'B', 'A', 'B', 'B'] },
+        { name: 'Participant 3', creneau: 'Créneau 1', codes: ['703', '517', '409', '731', '880'], order: ['A', 'B', 'B', 'A', 'B'] },
+        { name: 'Participant 4', creneau: 'Créneau 1', codes: ['542', '63', '757', '289', '307'], order: ['A', 'B', 'B', 'B', 'A'] },
+        { name: 'Participant 5', creneau: 'Créneau 2', codes: ['718', '673', '665', '981', '323'], order: ['B', 'B', 'B', 'A', 'A'] },
+        { name: 'Participant 6', creneau: 'Créneau 2', codes: ['689', '793', '832', '912', '701'], order: ['B', 'A', 'A', 'B', 'B'] },
+        { name: 'Participant 7', creneau: 'Créneau 2', codes: ['403', '38', '293', '563', '518'], order: ['B', 'B', 'A', 'A', 'A'] },
+        { name: 'Participant 8', creneau: 'Créneau 2', codes: ['291', '143', '334', '309', '391'], order: ['B', 'A', 'B', 'A', 'A'] },
+        { name: 'Participant 9', creneau: 'Créneau 3', codes: ['755', '906', '470', '902', '146'], order: ['B', 'A', 'A', 'B', 'A'] },
+        { name: 'Participant 10', creneau: 'Créneau 3', codes: ['429', '64', '877', '766', '950'], order: ['B', 'A', 'A', 'A', 'B'] },
+        { name: 'Participant 11', creneau: 'Créneau 3', codes: ['62', '623', '916', '298', '908'], order: ['A', 'A', 'A', 'B', 'B'] },
+        { name: 'Participant 12', creneau: 'Créneau 3', codes: ['490', '855', '712', '749', '198'], order: ['A', 'B', 'B', 'A', 'A'] },
+      ],
+    };
+  }
+
+  loadSessions() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(this.SESSIONS_KEY) || '[]');
+      if (raw.length) return raw;
+    } catch (e) {}
+    const seeded = [this.buildSeedSession()];
+    try { localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(seeded)); } catch (e) {}
+    return seeded;
+  }
+  persistSessions(sessions) {
+    try { localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(sessions)); } catch (e) {}
+  }
+
+  state = {
+    mode: 'participant', // participant | gate | admin
+    gateCode: '', gateError: false,
+    step: 0,
+    sessions: [],
+    adminViewSessionId: null,
+    adminCreatingSession: false,
+    adminDetailParticipant: null,
+    adminTab: 'sessions',
+    newSessionProductName: '',
+    selectedName: '',
+    locations: {},
+    dragging: null,
+    intensity: 50,
+    description: '',
+  };
+
+  poolRef = React.createRef();
+  block2Ref = React.createRef();
+  block3Ref = React.createRef();
+
+  componentDidMount() {
+    window.addEventListener('pointermove', this.onPointerMove);
+    window.addEventListener('pointerup', this.onPointerUp);
+    window.addEventListener('storage', this.onStorageEvent);
+    window.addEventListener('focus', this.refreshSessions);
+    const sessions = this.loadSessions();
+    let savedId = null;
+    try { savedId = localStorage.getItem(this.SELECTED_SESSION_KEY); } catch (e) {}
+    const initialId = (savedId && sessions.some(s => s.id === savedId)) ? savedId : sessions[sessions.length - 1].id;
+    this.setState({ sessions, adminViewSessionId: initialId });
+  }
+  componentWillUnmount() {
+    window.removeEventListener('pointermove', this.onPointerMove);
+    window.removeEventListener('pointerup', this.onPointerUp);
+    window.removeEventListener('storage', this.onStorageEvent);
+    window.removeEventListener('focus', this.refreshSessions);
+  }
+  onStorageEvent = (e) => {
+    if (e.key === this.SESSIONS_KEY) this.refreshSessions();
+  };
+  refreshSessions = () => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(this.SESSIONS_KEY) || '[]');
+      if (raw.length) this.setState({ sessions: raw });
+    } catch (e) {}
+  };
+
+  getLastSession() { const s = this.state.sessions; return s.length ? s[s.length - 1] : this.buildSeedSession(); }
+  getActiveSession() {
+    const s = this.state.sessions;
+    return s.find(x => x.id === this.state.adminViewSessionId) || this.getLastSession();
+  }
+  getViewSession() { return this.getActiveSession(); }
+  getParticipant() { return this.getActiveSession().participants.find(p => p.name === this.state.selectedName); }
+  getCodes() { const p = this.getParticipant(); return p ? p.codes : []; }
+
+  createSession = () => {
+    const name = (this.state.newSessionProductName || '').trim();
+    if (!name) return;
+    const usedCodes = new Set();
+    const genCode = () => {
+      let c;
+      do { c = String(Math.floor(100 + Math.random() * 900)); } while (usedCodes.has(c));
+      usedCodes.add(c);
+      return c;
+    };
+    const genOrder = () => {
+      const minority = Math.random() < 0.5 ? 'A' : 'B';
+      const majority = minority === 'A' ? 'B' : 'A';
+      const order = [minority, minority, majority, majority, majority];
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      return order;
+    };
+    // Participants aren't pre-filled: they only exist once registered (with a créneau) via the sign-up form.
+    const session = {
+      id: 's' + Date.now(), productName: name,
+      storeName: this.getActiveSession().storeName || 'Giant',
+      createdAt: Date.now(), participants: [],
+    };
+    const sessions = [...this.state.sessions, session];
+    this.persistSessions(sessions);
+    try { localStorage.setItem(this.SELECTED_SESSION_KEY, session.id); } catch (e) {}
+    this.setState({
+      sessions, adminViewSessionId: session.id, adminCreatingSession: false, newSessionProductName: '',
+      selectedName: '', locations: {}, step: 0,
+    });
+  };
+  onNewSessionProductNameChange = (e) => this.setState({ newSessionProductName: e.target.value });
+  selectViewSession = (id) => {
+    try { localStorage.setItem(this.SELECTED_SESSION_KEY, id); } catch (e) {}
+    this.setState({ adminViewSessionId: id, adminCreatingSession: false });
+  };
+  setAdminTab = (tab) => this.setState({ adminTab: tab });
+  onAdminSessionSelectChange = (e) => {
+    const val = e.target.value;
+    if (val === '__new__') this.setState({ adminCreatingSession: true });
+    else this.selectViewSession(val);
+  };
+  updateParticipantName = (sessionId, index, name) => {
+    const sessions = this.state.sessions.map(sess => {
+      if (sess.id !== sessionId) return sess;
+      const participants = sess.participants.map((p, i) => i === index ? { ...p, name } : p);
+      return { ...sess, participants };
+    });
+    this.persistSessions(sessions);
+    this.setState({ sessions });
+  };
+  updateParticipantCreneau = (sessionId, index, creneau) => {
+    const sessions = this.state.sessions.map(sess => {
+      if (sess.id !== sessionId) return sess;
+      const participants = sess.participants.map((p, i) => i === index ? { ...p, creneau } : p);
+      return { ...sess, participants };
+    });
+    this.persistSessions(sessions);
+    this.setState({ sessions });
+  };
+  deleteSession = (id, e) => {
+    if (e) e.stopPropagation();
+    if (this.state.sessions.length <= 1) return;
+    const sessions = this.state.sessions.filter(s => s.id !== id);
+    this.persistSessions(sessions);
+    const all = this.readAllSubmissions();
+    delete all[id];
+    try { localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(all)); } catch (err) {}
+    const nextView = this.state.adminViewSessionId === id ? sessions[sessions.length - 1].id : this.state.adminViewSessionId;
+    try { localStorage.setItem(this.SELECTED_SESSION_KEY, nextView); } catch (err) {}
+    this.setState({ sessions, adminViewSessionId: nextView });
+  };
+
+  next = () => {
+    if (this.state.step === 5) this.saveSubmission();
+    this.setState(s => ({ step: Math.min(6, s.step + 1) }));
+  };
+  back = () => this.setState(s => ({ step: Math.max(0, s.step - 1) }));
+  restart = () => this.setState({
+    step: 0, selectedName: '', locations: {}, dragging: null, intensity: 50, description: '',
+  });
+
+  onNameChange = (e) => {
+    const name = e.target.value;
+    const p = this.getActiveSession().participants.find(x => x.name === name);
+    const codes = p ? p.codes : [];
+    this.setState({
+      selectedName: name,
+      locations: Object.fromEntries(codes.map(c => [c, 'pool'])),
+    });
+  };
+  onIntensityChange = (e) => this.setState({ intensity: Number(e.target.value) });
+  onDescriptionChange = (e) => this.setState({ description: e.target.value });
+
+  enterGate = () => this.setState({ mode: 'gate', gateCode: '', gateError: false });
+  exitGate = () => this.setState({ mode: 'participant', gateCode: '', gateError: false });
+  onGateCodeChange = (e) => this.setState({ gateCode: e.target.value, gateError: false });
+  onGateSubmit = () => {
+    if (this.state.gateCode === '2026') this.setState({ mode: 'admin' });
+    else this.setState({ gateError: true });
+  };
+
+  readAllSubmissions() {
+    try { return JSON.parse(localStorage.getItem(this.SUBMISSIONS_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  saveSubmission() {
+    const p = this.getParticipant();
+    if (!p) return;
+    const sessionId = this.getActiveSession().id;
+    const b2 = Object.keys(this.state.locations).filter(c => this.state.locations[c] === 'b2');
+    const b3 = Object.keys(this.state.locations).filter(c => this.state.locations[c] === 'b3');
+    const all = this.readAllSubmissions();
+    let list = all[sessionId] || [];
+    list = list.filter(r => r.name !== p.name);
+    list.push({ name: p.name, bloc2: b2, bloc3: b3, intensity: this.state.intensity, description: this.state.description, ts: Date.now() });
+    all[sessionId] = list;
+    try { localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+  readSubmissions(sessionId) {
+    const all = this.readAllSubmissions();
+    return all[sessionId] || [];
+  }
+
+  startDrag(code, e) {
+    e.preventDefault();
+    this.setState({ dragging: { code, x: e.clientX, y: e.clientY } });
+  }
+  onPointerMove = (e) => {
+    if (!this.state.dragging) return;
+    this.setState(s => ({ dragging: { ...s.dragging, x: e.clientX, y: e.clientY } }));
+  };
+  onPointerUp = () => {
+    const d = this.state.dragging;
+    if (!d) return;
+    const { code, x, y } = d;
+    const inRect = (ref) => {
+      if (!ref.current) return false;
+      const r = ref.current.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    };
+    this.setState(s => {
+      const locations = { ...s.locations };
+      const countIn = (loc) => Object.entries(locations).filter(([c, l]) => l === loc && c !== code).length;
+      const overB2 = inRect(this.block2Ref);
+      const overB3 = inRect(this.block3Ref);
+      let newLoc = 'pool';
+      if (overB2 && countIn('b2') < 2) newLoc = 'b2';
+      else if (overB3 && countIn('b3') < 3) newLoc = 'b3';
+      else if (overB2 || overB3) newLoc = locations[code];
+      locations[code] = newLoc;
+      return { locations, dragging: null };
+    });
+  };
+
+  STOPWORDS = new Set(['le','la','les','de','du','des','un','une','et','ou','que','qui','quoi','est','dans','pour','avec','plus','moins','tres','peu','pas','ne','on','il','elle','ils','elles','ce','cette','ces','cet','au','aux','a','en','se','sa','son','ses','leur','leurs','mon','ma','mes','ton','ta','tes','notre','nos','votre','vos','d','l','j','y','n','s','t','c','qu','ete','etais','etait','etre','avoir','nous','vous','je','tu','tu','mais','donc','or','ni','car','si','comme','sans','sous','sur','entre','vers','chez','par','trop','bien','fait','faire','cela','ca','tout','toute','tous','toutes','autre','autres','meme','aussi','encore','deja','ici','la','ete','on','ont','a','avons','avez','ai','as']);
+
+  extractKeywords(descriptions) {
+    const counts = {};
+    for (const desc of descriptions) {
+      if (!desc) continue;
+      const norm = desc.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const words = norm.split(/[^a-z]+/).filter(w => w.length >= 4 && !this.STOPWORDS.has(w));
+      for (const w of words) counts[w] = (counts[w] || 0) + 1;
+    }
+    return Object.entries(counts)
+      .filter(([, c]) => c >= 1)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([word, count]) => ({ word, count }));
+  }
+
+  tabStyle(active) {
+    return {
+      flex: 1, textAlign: 'center', padding: '8px 0', fontSize: 13, cursor: 'pointer',
+      fontFamily: 'var(--font-heading)', borderRadius: 999,
+      background: active ? 'var(--color-accent)' : 'transparent',
+      color: active ? 'var(--color-bg)' : 'var(--color-text)',
+    };
+  }
+
+  buildChip(code) {
+    const dragging = this.state.dragging;
+    const isDraggingThis = dragging && dragging.code === code;
+    return {
+      code,
+      onPointerDown: (e) => this.startDrag(code, e),
+      style: {
+        width: 48, height: 48, borderRadius: '50%', flex: 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'var(--font-heading)', fontSize: 14,
+        background: 'var(--color-surface)', border: '1px solid var(--color-divider)',
+        cursor: 'grab', touchAction: 'none', userSelect: 'none',
+        opacity: isDraggingThis ? 0 : 1,
+      },
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const step = s.step;
+    const skip = this.props.skipValidation ?? false;
+    const activeSession = this.getActiveSession();
+    const productName = activeSession.productName;
+    const storeName = activeSession.storeName;
+    const progressPct = step < 1 ? 0 : step > 5 ? 100 : (step / 5) * 100;
+    const codes = this.getCodes();
+
+    const poolChips = codes.filter(c => s.locations[c] === 'pool').map(c => this.buildChip(c));
+    const b2Chips = codes.filter(c => s.locations[c] === 'b2').map(c => this.buildChip(c));
+    const b3Chips = codes.filter(c => s.locations[c] === 'b3').map(c => this.buildChip(c));
+    const b2Empty = Array(Math.max(0, 2 - b2Chips.length)).fill(0);
+    const b3Empty = Array(Math.max(0, 3 - b3Chips.length)).fill(0);
+    const dragging = s.dragging;
+    const sampleCards = codes.map(code => ({ code }));
+
+    const ctaDisabled = !skip && (
+      (step === 0 && !s.selectedName) ||
+      (step === 3 && poolChips.length > 0)
+    );
+    const ctaLabels = {
+      0: 'Continuer', 1: "J'ai compris, continuer", 2: 'Passer au classement',
+      3: 'Continuer', 4: 'Continuer', 5: 'Envoyer mes réponses',
+    };
+
+    // admin: session history + correspondence for the viewed session
+    const viewSession = this.getViewSession();
+    const sessionRows = [...s.sessions].reverse().map(sess => {
+      const isActive = sess.id === activeSession.id;
+      const isSelected = sess.id === (s.adminViewSessionId || viewSession.id);
+      const count = this.readSubmissions(sess.id).length;
+      return {
+        id: sess.id, productName: sess.productName,
+        dateStr: sess.day || new Date(sess.createdAt).toLocaleDateString('fr-FR'),
+        submissionCount: count, isActive,
+        canDelete: s.sessions.length > 1,
+        onSelect: () => this.selectViewSession(sess.id),
+        onDelete: (e) => this.deleteSession(sess.id, e),
+        rowStyle: {
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 14px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+          border: isSelected ? '1.5px solid var(--color-accent)' : '1px solid var(--color-divider)',
+          background: isSelected ? 'var(--color-accent-100)' : 'var(--color-surface)',
+        },
+      };
+    });
+    const letterStyle = (letter) => ({
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      width: 20, height: 20, borderRadius: '50%', fontSize: 11, fontFamily: 'var(--font-heading)',
+      background: letter === 'A' ? '#e3f5e8' : '#efe6fb',
+      color: letter === 'A' ? '#1e8a3c' : '#6b21a8',
+    });
+    const tableRows = viewSession.participants.map((p, i) => ({
+      num: i + 1, name: p.name, creneau: p.creneau,
+      orderChips: p.order.map((letter, ci) => ({
+        letter, code: p.codes[ci], style: letterStyle(letter),
+        codeStyle: { fontSize: 10, color: letter === 'A' ? '#1e8a3c' : '#6b21a8' },
+      })),
+      onNameChange: (e) => this.updateParticipantName(viewSession.id, i, e.target.value),
+      onCreneauChange: (e) => this.updateParticipantCreneau(viewSession.id, i, e.target.value),
+    }));
+    const submissionsForCount = this.readSubmissions(viewSession.id);
+    const submissions = submissionsForCount;
+    const adminRows = viewSession.participants.map(p => {
+      const countA = p.order.filter(o => o === 'A').length;
+      const minorityLetter = countA === 2 ? 'A' : 'B';
+      const truth2 = p.codes.filter((c, i) => p.order[i] === minorityLetter);
+      const sub = submissions.find(r => r.name === p.name);
+      const answerSet = sub ? [...sub.bloc2].sort().join(',') : null;
+      const truthSet = [...truth2].sort().join(',');
+      const correct = sub ? answerSet === truthSet : null;
+      return {
+        name: p.name, creneau: p.creneau, correctBool: correct,
+        codesStr: p.codes.join(' · '),
+        truth2Str: truth2.join(' + '),
+        hasSubmission: !!sub,
+        answerStr: sub ? sub.bloc2.join(' + ') : 'en attente',
+        bloc3Str: sub ? sub.bloc3.join(' + ') : '',
+        resultLabel: sub ? (correct ? 'Correct' : 'Incorrect') : '—',
+        resultTagStyle: {
+          display: 'inline-flex', alignItems: 'center', fontSize: 11, padding: '3px 10px', borderRadius: 999,
+          background: sub ? (correct ? '#e3f5e8' : 'var(--color-accent-100)') : 'var(--color-neutral-100)',
+          color: sub ? (correct ? '#1e8a3c' : 'var(--color-accent-800)') : 'var(--color-neutral-700)',
+        },
+        intensityStr: sub ? `${sub.intensity}/100` : '',
+        description: sub ? (sub.description || '(aucune description)') : '',
+        onOpen: () => this.setState({ adminDetailParticipant: p.name }),
+      };
+    });
+    const correctCount = adminRows.filter(r => r.correctBool === true).length;
+    const keywordChips = this.extractKeywords(submissions.map(sub => sub.description));
+    const avgIntensity = submissions.length ? Math.round(submissions.reduce((sum, sub) => sum + (sub.intensity || 0), 0) / submissions.length) : 0;
+
+    const sessionOptions = [...s.sessions].reverse().map(sess => ({
+      id: sess.id,
+      label: `${sess.productName}${sess.day ? ' — ' + sess.day : ''}${sess.id === activeSession.id ? ' (Active)' : ''}`,
+    }));
+
+    return {
+      isGate: s.mode === 'gate', isAdmin: s.mode === 'admin', isParticipantFlow: s.mode === 'participant',
+      gateCode: s.gateCode, gateError: s.gateError, onGateCodeChange: this.onGateCodeChange, onGateSubmit: this.onGateSubmit, exitGate: this.exitGate, enterGate: this.enterGate,
+      storeName, productName, adminRows, sessionRows, tableRows,
+      keywordChips, hasKeywords: keywordChips.length > 0,
+      avgIntensityStr: String(avgIntensity), hasAvgIntensity: submissions.length > 0,
+      sessionOptions,
+      adminSessionSelectValue: s.adminCreatingSession ? '__new__' : (s.adminViewSessionId || viewSession.id),
+      onAdminSessionSelectChange: this.onAdminSessionSelectChange,
+      adminCreatingSession: s.adminCreatingSession,
+      canDeleteViewed: s.sessions.length > 1,
+      onDeleteViewed: () => this.deleteSession(viewSession.id),
+      isAdminDetail: !!s.adminDetailParticipant,
+      isAdminList: !s.adminDetailParticipant,
+      adminDetail: adminRows.find(r => r.name === s.adminDetailParticipant) || {},
+      adminDetailNoSubmission: !!s.adminDetailParticipant && !adminRows.find(r => r.name === s.adminDetailParticipant)?.hasSubmission,
+      closeAdminDetail: () => this.setState({ adminDetailParticipant: null }),
+      isAdminTabSessions: s.adminTab === 'sessions', isAdminTabTable: s.adminTab === 'table', isAdminTabResults: s.adminTab === 'results',
+      showSessionsTab: () => this.setAdminTab('sessions'), showTableTab: () => this.setAdminTab('table'), showResultsTab: () => this.setAdminTab('results'),
+      sessionsTabStyle: this.tabStyle(s.adminTab === 'sessions'),
+      tableTabStyle: this.tabStyle(s.adminTab === 'table'),
+      resultsTabStyle: this.tabStyle(s.adminTab === 'results'),
+      correctCount, totalParticipants: viewSession.participants.length,
+      resultsBadgeStyle: {
+        width: 96, height: 96, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: correctCount <= 4 ? '#e3f5e8' : 'var(--color-accent-100)',
+        border: `3px solid ${correctCount <= 4 ? '#1e8a3c' : 'var(--color-accent)'}`,
+        color: correctCount <= 4 ? '#1e8a3c' : 'var(--color-accent-800)',
+      },
+      resultsRows: adminRows.map(r => ({
+        name: r.name,
+        label: !r.hasSubmission ? 'En attente' : (r.correctBool ? 'Trouvé' : 'Non trouvé'),
+        tagStyle: {
+          display: 'inline-flex', alignItems: 'center', fontSize: 11, padding: '3px 10px', borderRadius: 999,
+          background: !r.hasSubmission ? 'var(--color-neutral-100)' : (r.correctBool ? 'var(--color-accent-2-100)' : 'var(--color-accent-100)'),
+          color: !r.hasSubmission ? 'var(--color-neutral-700)' : (r.correctBool ? 'var(--color-accent-2-800)' : 'var(--color-accent-800)'),
+        },
+      })),
+      viewedProductName: viewSession.productName,
+      newSessionProductName: s.newSessionProductName,
+      onNewSessionProductNameChange: this.onNewSessionProductNameChange,
+      onCreateSession: this.createSession,
+      isStep0: step === 0, isStep1: step === 1, isStep2: step === 2, isStep3: step === 3,
+      isStep4: step === 4, isStep5: step === 5, isStep6: step === 6,
+      resultBadgeLabel: (() => {
+        const p = this.getParticipant();
+        if (!p) return '';
+        const countA = p.order.filter(o => o === 'A').length;
+        const minorityLetter = countA === 2 ? 'A' : 'B';
+        const truth2 = [...p.codes.filter((c, i) => p.order[i] === minorityLetter)].sort().join(',');
+        const answer2 = Object.keys(s.locations).filter(c => s.locations[c] === 'b2').sort().join(',');
+        return answer2 === truth2 ? 'CORRECTE' : 'INCORRECTE';
+      })(),
+      resultBadgeStyle: (() => {
+        const p = this.getParticipant();
+        let correct = false;
+        if (p) {
+          const countA = p.order.filter(o => o === 'A').length;
+          const minorityLetter = countA === 2 ? 'A' : 'B';
+          const truth2 = [...p.codes.filter((c, i) => p.order[i] === minorityLetter)].sort().join(',');
+          const answer2 = Object.keys(s.locations).filter(c => s.locations[c] === 'b2').sort().join(',');
+          correct = answer2 === truth2;
+        }
+        return {
+          fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 22, letterSpacing: '.05em',
+          padding: '8px 24px', borderRadius: 999,
+          background: correct ? '#e3f5e8' : 'var(--color-accent-100)',
+          color: correct ? '#1e8a3c' : 'var(--color-accent-800)',
+        };
+      })(),
+      hearts: Array.from({ length: 8 }).map((_, i) => ({
+        style: {
+          position: 'absolute', bottom: '-10%', left: `${8 + i * 11}%`,
+          fontSize: 18 + (i % 3) * 8, animation: `heartFloat ${2.4 + (i % 4) * 0.4}s ease-in ${i * 0.15}s infinite`,
+          pointerEvents: 'none',
+        },
+      })),
+      showHeader: s.mode === 'participant' && step >= 1 && step <= 5,
+      showBack: s.mode === 'participant' && step >= 1 && step <= 5,
+      showCta: s.mode === 'participant' && step <= 5,
+      progressFillStyle: { height: '100%', borderRadius: 999, background: 'var(--color-accent)', width: progressPct + '%' },
+      ctaLabel: ctaLabels[step] || 'Continuer',
+      ctaDisabled,
+      next: this.next, back: this.back, restart: this.restart,
+      nameOptions: activeSession.participants.map(p => p.name),
+      activeProductName: activeSession.productName, activeDay: activeSession.day || new Date(activeSession.createdAt).toLocaleDateString('fr-FR'),
+      selectedName: s.selectedName, onNameChange: this.onNameChange,
+      protocolSteps: [
+        { n: 1, text: 'Regroupez les 5 échantillons selon leur ressemblance perçue (2 contre 3).' },
+        { n: 2, text: "Notez l'intensité de la différence entre les deux groupes." },
+        { n: 3, text: 'Décrivez ce que vous percevez comme différence.' },
+      ],
+      sampleCards,
+      poolRef: this.poolRef, block2Ref: this.block2Ref, block3Ref: this.block3Ref,
+      poolChips, b2Chips, b3Chips, b2Empty, b3Empty,
+      blockStyle: {
+        display: 'flex', flexWrap: 'wrap', gap: 10, minHeight: 60,
+        padding: 10, borderRadius: 'var(--radius-lg)', justifyContent: 'center',
+        border: '1.5px dashed var(--color-divider)', background: 'var(--color-surface)',
+      },
+      emptySlotStyle: { width: 48, height: 48, borderRadius: '50%', flex: 'none', border: '1.5px dashed var(--color-neutral-400)' },
+      isDragging: !!dragging,
+      draggingCode: dragging ? dragging.code : '',
+      floatingChipStyle: dragging ? {
+        position: 'fixed', left: dragging.x - 24, top: dragging.y - 24,
+        width: 48, height: 48, borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'var(--font-heading)', fontSize: 14,
+        background: 'var(--color-accent)', color: 'var(--color-bg)',
+        border: '1px solid var(--color-accent)', pointerEvents: 'none',
+        zIndex: 999, boxShadow: 'var(--shadow-md)',
+      } : { display: 'none' },
+      intensity: s.intensity, onIntensityChange: this.onIntensityChange,
+      description: s.description, onDescriptionChange: this.onDescriptionChange,
+    };
+  }
+}
+</script>
+</body>
+</html>
