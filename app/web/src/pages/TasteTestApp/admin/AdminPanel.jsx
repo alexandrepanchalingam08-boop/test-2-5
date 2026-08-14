@@ -21,9 +21,13 @@ function tabStyle(active) {
   };
 }
 
+function emptyDraft() {
+  return { productName: '', day: '', place: '', slotLabels: ['', '', ''] };
+}
+
 export default function AdminPanel({ sessions, activeSession, refresh, onExit }) {
   const [creating, setCreating] = useState(false);
-  const [newProductName, setNewProductName] = useState('');
+  const [draft, setDraft] = useState(emptyDraft());
   const [tab, setTab] = useState('participants');
   const [detailId, setDetailId] = useState(null);
 
@@ -35,6 +39,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   const onSessionSelectChange = async (e) => {
     const val = e.target.value;
     if (val === '__new__') {
+      setDraft(emptyDraft());
       setCreating(true);
       return;
     }
@@ -43,12 +48,24 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
     await refresh();
   };
 
+  const setSlotLabel = (i, value) => setDraft((d) => {
+    const slotLabels = [...d.slotLabels];
+    slotLabels[i] = value;
+    return { ...d, slotLabels };
+  });
+
   const onCreateSession = async () => {
-    const name = newProductName.trim();
+    const name = draft.productName.trim();
     if (!name) return;
-    await createSession({ productName: name, storeName: activeSession?.storeName });
+    await createSession({
+      productName: name,
+      storeName: draft.place || activeSession?.storeName,
+      day: draft.day,
+      place: draft.place,
+      slotLabels: draft.slotLabels,
+    });
     setCreating(false);
-    setNewProductName('');
+    setDraft(emptyDraft());
     setDetailId(null);
     await refresh();
   };
@@ -70,7 +87,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 20, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: 14, opacity: 0.75 }}>Aucun test pour le moment.</p>
-          <button className="btn btn-primary" onClick={() => setCreating(true)}>+ Nouvelle session</button>
+          <button className="btn btn-primary" onClick={() => { setDraft(emptyDraft()); setCreating(true); }}>+ Nouvelle session</button>
         </div>
       </div>
     );
@@ -103,14 +120,43 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
       </div>
 
       {creating && (
-        <div style={{ padding: '0 20px 10px', flex: 'none', display: 'flex', gap: 8 }}>
-          <input
-            className="input" type="text" placeholder="Nom du produit" value={newProductName}
-            onChange={(e) => setNewProductName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') onCreateSession(); }}
-            style={{ flex: 1 }}
-          />
-          <button className="btn btn-primary" onClick={onCreateSession} style={{ flex: 'none' }}>Créer</button>
+        <div style={{ padding: '0 20px 16px', flex: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="field">
+            <label htmlFor="new-session-product">Nom du produit</label>
+            <input
+              id="new-session-product" className="input" type="text" value={draft.productName}
+              onChange={(e) => setDraft((d) => ({ ...d, productName: e.target.value }))}
+              style={{ minHeight: 38 }}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="new-session-day">Date</label>
+            <input
+              id="new-session-day" className="input" type="text" value={draft.day}
+              onChange={(e) => setDraft((d) => ({ ...d, day: e.target.value }))}
+              style={{ minHeight: 38 }}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="new-session-place">Lieu</label>
+            <input
+              id="new-session-place" className="input" type="text" value={draft.place}
+              onChange={(e) => setDraft((d) => ({ ...d, place: e.target.value }))}
+              style={{ minHeight: 38 }}
+            />
+          </div>
+          {draft.slotLabels.map((val, i) => (
+            <div className="field" key={i}>
+              <label>Créneau {i + 1}</label>
+              <input
+                className="input" type="text" value={val}
+                onChange={(e) => setSlotLabel(i, e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') onCreateSession(); }}
+                style={{ minHeight: 38 }}
+              />
+            </div>
+          ))}
+          <button className="btn btn-primary" onClick={onCreateSession} style={{ marginTop: 4 }}>Créer</button>
         </div>
       )}
 
