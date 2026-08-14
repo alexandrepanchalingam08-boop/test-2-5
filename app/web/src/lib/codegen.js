@@ -19,6 +19,22 @@ export function pickMinorityLetter(existingOrders) {
   return Math.random() < 0.5 ? 'A' : 'B';
 }
 
+// Which letter lands in the first position is balanced the same way as the
+// minority letter — a plain shuffle would already favor the majority letter
+// there (3 of its 5 slots vs 2), on top of whatever skew the minority-letter
+// balance itself introduces.
+export function pickFirstLetter(existingOrders) {
+  let countA = 0;
+  let countB = 0;
+  for (const order of existingOrders) {
+    if (order[0] === 'A') countA++;
+    else countB++;
+  }
+  if (countA < countB) return 'A';
+  if (countB < countA) return 'B';
+  return Math.random() < 0.5 ? 'A' : 'B';
+}
+
 export function genOrder(existingOrders = []) {
   const minority = pickMinorityLetter(existingOrders);
   const majority = minority === 'A' ? 'B' : 'A';
@@ -26,6 +42,14 @@ export function genOrder(existingOrders = []) {
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
+  }
+  // Force position 0 to the balanced choice without disturbing the 2-vs-3
+  // composition: swap it in from wherever it landed (always found, since
+  // both letters are always present in a 2-vs-3 split).
+  const desiredFirst = pickFirstLetter(existingOrders);
+  if (order[0] !== desiredFirst) {
+    const swapIndex = order.findIndex((letter, idx) => idx > 0 && letter === desiredFirst);
+    [order[0], order[swapIndex]] = [order[swapIndex], order[0]];
   }
   return order;
 }
