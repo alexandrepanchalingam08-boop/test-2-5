@@ -3,12 +3,12 @@ import { useSessions } from '../../lib/SessionsContext.jsx';
 import { createSession, updateSession, setActiveSession, registerParticipant, removeParticipant } from '../../lib/db.js';
 import { ADMIN_CODE } from '../../components/AdminGate.jsx';
 import { CloseIcon } from '../../components/icons.jsx';
+import { DEFAULT_SLOT_LABELS } from '../../lib/timeSlots.js';
 
-const DEFAULT_SLOT_LABELS = ['12h - 12h30', '12h30 - 13h', '13h - 13h30'];
 const SPOTS_PER_SLOT = 4;
 
 function emptyDraft() {
-  return { sessionId: '__new__', product: '', day: '', place: '', slotLabels: ['', '', ''], labelA: '', labelB: '' };
+  return { sessionId: '__new__', product: '', day: '', place: '', slotLabels: [...DEFAULT_SLOT_LABELS], labelA: '', labelB: '' };
 }
 
 export default function Inscription() {
@@ -30,7 +30,7 @@ export default function Inscription() {
       product: session?.productName ?? '',
       day: session?.day ?? '',
       place: session?.place ?? '',
-      slotLabels: session?.slotLabels?.length ? [...session.slotLabels] : ['', '', ''],
+      slotLabels: session?.slotLabels?.length ? [...session.slotLabels] : [...DEFAULT_SLOT_LABELS],
       labelA: session?.labelA ?? '',
       labelB: session?.labelB ?? '',
     });

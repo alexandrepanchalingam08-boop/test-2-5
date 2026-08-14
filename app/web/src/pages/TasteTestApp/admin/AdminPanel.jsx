@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createSession, deleteSession, setActiveSession } from '../../../lib/db.js';
 import { TrashIcon, DownloadIcon } from '../../../components/icons.jsx';
 import { exportSessionToCsv } from '../../../lib/exportCsv.js';
+import { DEFAULT_SLOT_LABELS } from '../../../lib/timeSlots.js';
 import ParticipantsTab from './ParticipantsTab.jsx';
 import TableTab from './TableTab.jsx';
 import ResultsTab from './ResultsTab.jsx';
@@ -22,7 +23,7 @@ function tabStyle(active) {
 }
 
 function emptyDraft() {
-  return { productName: '', day: '', place: '', slotLabels: ['', '', ''], labelA: '', labelB: '' };
+  return { productName: '', day: '', place: '', slotLabels: [...DEFAULT_SLOT_LABELS], labelA: '', labelB: '' };
 }
 
 export default function AdminPanel({ sessions, activeSession, refresh, onExit }) {
