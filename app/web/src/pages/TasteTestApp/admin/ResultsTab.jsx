@@ -30,7 +30,7 @@ export default function ResultsTab({ session }) {
       </div>
       {submissions.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginTop: -8 }}>
-          <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>Intensité moyenne perçue</span>
+          <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>Intensité moyenne de la différence perçue</span>
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700 }}>{avgIntensity}/100</span>
         </div>
       )}
