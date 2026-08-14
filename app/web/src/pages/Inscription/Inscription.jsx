@@ -114,7 +114,7 @@ export default function Inscription() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span className="tag tag-accent" style={{ alignSelf: 'flex-start' }}>Inscription</span>
                 <h1 style={{ margin: 0 }}>{activeSession.productName}</h1>
-                <span style={{ fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.6 }}>
+                <span style={{ fontSize: 21, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', opacity: 0.75 }}>
                   {activeSession.day || new Date(activeSession.createdAt).toLocaleDateString('fr-FR')}
                 </span>
                 <p style={{ margin: '4px 0 0', fontSize: 14, opacity: 0.7 }}>Merci de vous inscrire dans l'un des créneaux ci-dessous.</p>
