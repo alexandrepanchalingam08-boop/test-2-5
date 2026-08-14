@@ -162,17 +162,18 @@ a { color: var(--color-accent); text-underline-offset: 3px; }
 
 .dialog-backdrop {
   position: fixed; inset: 0; display: grid; place-items: center;
-  padding: var(--space-4); z-index: 100;
+  padding: var(--space-4); z-index: 100; overflow-y: auto;
   background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
 }
 .dialog {
-  width: min(440px, 100%); display: flex; flex-direction: column; gap: var(--space-3);
+  width: min(440px, 100%); max-height: calc(100vh - 2 * var(--space-4)); max-height: calc(100dvh - 2 * var(--space-4));
+  display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-4); border-radius: calc(var(--radius-lg) * 1.15);
   background: var(--color-surface); box-shadow: var(--shadow-lg);
 }
-.dialog-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 20px; }
-.dialog-body { font-size: 14px; opacity: 0.85; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
+.dialog-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 20px; flex: none; }
+.dialog-body { font-size: 14px; opacity: 0.85; overflow-y: auto; min-height: 0; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); flex: none; }
 
 @keyframes heartFloat {
   0% { transform: translateY(0) scale(1); opacity: 0; }

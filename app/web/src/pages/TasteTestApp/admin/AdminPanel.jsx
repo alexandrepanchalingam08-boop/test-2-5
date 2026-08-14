@@ -84,7 +84,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
 
   if (!activeSession && !creating) {
     return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
         <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 10px', flex: 'none', display: 'flex', justifyContent: 'flex-end' }}>
           <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
         </div>
@@ -97,7 +97,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
       <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 10px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
         <select
           value={creating ? '__new__' : (activeSession?.id ?? '')}
