@@ -32,6 +32,12 @@ export default function TableTab({ session, refresh }) {
     refresh();
   };
 
+  const onCreneauChange = async (p, value) => {
+    if (value === p.creneau) return;
+    await updateParticipant(p.id, { creneau: value });
+    refresh();
+  };
+
   return (
     <>
       <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>
@@ -66,13 +72,18 @@ export default function TableTab({ session, refresh }) {
                   />
                 </td>
                 <td>
-                  <input
-                    className="input" type="text" value={valueOf(p, 'creneau')}
-                    onChange={(e) => onChange(p, 'creneau', e.target.value)}
-                    onBlur={() => onCommit(p, 'creneau')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
-                    style={{ minHeight: 28, padding: '3px 8px', fontSize: 12, minWidth: 100 }}
-                  />
+                  <select
+                    className="input" value={p.creneau}
+                    onChange={(e) => onCreneauChange(p, e.target.value)}
+                    style={{ minHeight: 28, padding: '3px 8px', fontSize: 12, minWidth: 130 }}
+                  >
+                    {!session.slotLabels.includes(p.creneau) && (
+                      <option value={p.creneau}>{p.creneau}</option>
+                    )}
+                    {session.slotLabels.map((label) => (
+                      <option key={label} value={label}>{label}</option>
+                    ))}
+                  </select>
                 </td>
                 <td style={{ fontFamily: 'monospace', display: 'flex', gap: 6 }}>
                   {p.truthOrder.map((letter, ci) => (
