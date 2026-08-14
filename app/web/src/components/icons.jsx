@@ -22,6 +22,16 @@ export function TrashIcon(props) {
   );
 }
 
+export function DownloadIcon(props) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 3v12" />
+      <path d="M6 11l6 6 6-6" />
+      <path d="M4 21h16" />
+    </svg>
+  );
+}
+
 export function CloseIcon(props) {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" {...props}>

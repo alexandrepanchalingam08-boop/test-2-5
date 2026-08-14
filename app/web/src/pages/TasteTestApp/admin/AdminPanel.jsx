@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createSession, deleteSession, setActiveSession } from '../../../lib/db.js';
-import { TrashIcon } from '../../../components/icons.jsx';
+import { TrashIcon, DownloadIcon } from '../../../components/icons.jsx';
+import { exportSessionToCsv } from '../../../lib/exportCsv.js';
 import ParticipantsTab from './ParticipantsTab.jsx';
 import TableTab from './TableTab.jsx';
 import ResultsTab from './ResultsTab.jsx';
@@ -123,6 +124,18 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
                 </div>
               ))}
             </div>
+          </div>
+
+          <div style={{ padding: '0 20px 12px', flex: 'none', display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              className="btn btn-ghost"
+              onClick={() => exportSessionToCsv(activeSession)}
+              disabled={activeSession.participants.length === 0}
+              style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <DownloadIcon />
+              Télécharger (.csv)
+            </button>
           </div>
 
           <div style={{ flex: 1, overflow: 'auto', padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
