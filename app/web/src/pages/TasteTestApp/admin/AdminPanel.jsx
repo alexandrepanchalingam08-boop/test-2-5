@@ -82,6 +82,11 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
       labelA: draft.labelA,
       labelB: draft.labelB,
     });
+    // Only auto-activates when there was no active session at all yet
+    // (first-ever session) — otherwise the currently active session stays
+    // active, and the admin must pick the new one explicitly if it should
+    // go live.
+    if (!activeSession) await setActiveSession(created.id);
     setCreating(false);
     setDraft(emptyDraft());
     setDetailId(null);

@@ -66,10 +66,11 @@ export default function Inscription() {
         });
         await setActiveSession(draft.sessionId);
       } else {
-        await createSession({
+        const created = await createSession({
           productName, storeName: draft.place, day: draft.day, place: draft.place, slotLabels: draft.slotLabels,
           labelA: draft.labelA, labelB: draft.labelB,
         });
+        await setActiveSession(created.id);
       }
       setAdminOpen(false);
       await refresh();

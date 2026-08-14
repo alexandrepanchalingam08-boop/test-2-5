@@ -71,7 +71,8 @@ export async function createSession({ productName, storeName, day, place, slotLa
   if (labelB !== undefined) insert.label_b = labelB;
   const { data, error } = await supabase.from('sessions').insert(insert).select().single();
   if (error) throw error;
-  await setActiveSession(data.id);
+  // Does not activate the new session — callers that want it live for
+  // participants right away must call setActiveSession() explicitly.
   return mapSession({ ...data, participants: [] });
 }
 
