@@ -8,7 +8,7 @@ const DEFAULT_SLOT_LABELS = ['12h - 12h30', '12h30 - 13h', '13h - 13h30'];
 const SPOTS_PER_SLOT = 4;
 
 function emptyDraft() {
-  return { sessionId: '__new__', product: '', day: '', place: '', slotLabels: ['', '', ''] };
+  return { sessionId: '__new__', product: '', day: '', place: '', slotLabels: ['', '', ''], labelA: '', labelB: '' };
 }
 
 export default function Inscription() {
@@ -31,6 +31,8 @@ export default function Inscription() {
       day: session?.day ?? '',
       place: session?.place ?? '',
       slotLabels: session?.slotLabels?.length ? [...session.slotLabels] : ['', '', ''],
+      labelA: session?.labelA ?? '',
+      labelB: session?.labelB ?? '',
     });
   };
 
@@ -58,10 +60,16 @@ export default function Inscription() {
     try {
       const productName = draft.product.trim() || 'Produit à tester';
       if (draft.sessionId && draft.sessionId !== '__new__') {
-        await updateSession(draft.sessionId, { productName, day: draft.day, place: draft.place, slotLabels: draft.slotLabels });
+        await updateSession(draft.sessionId, {
+          productName, day: draft.day, place: draft.place, slotLabels: draft.slotLabels,
+          labelA: draft.labelA, labelB: draft.labelB,
+        });
         await setActiveSession(draft.sessionId);
       } else {
-        await createSession({ productName, storeName: draft.place, day: draft.day, place: draft.place, slotLabels: draft.slotLabels });
+        await createSession({
+          productName, storeName: draft.place, day: draft.day, place: draft.place, slotLabels: draft.slotLabels,
+          labelA: draft.labelA, labelB: draft.labelB,
+        });
       }
       setAdminOpen(false);
       await refresh();
@@ -234,6 +242,22 @@ export default function Inscription() {
                     <input className="input" type="text" value={val} onChange={(e) => setSlotLabel(i, e.target.value)} />
                   </div>
                 ))}
+                <div className="field">
+                  <label htmlFor="admin-label-a">Correspondance du groupe A</label>
+                  <input
+                    id="admin-label-a" className="input" type="text" value={draft.labelA}
+                    placeholder="ex : recette actuelle"
+                    onChange={(e) => setDraft((d) => ({ ...d, labelA: e.target.value }))}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="admin-label-b">Correspondance du groupe B</label>
+                  <input
+                    id="admin-label-b" className="input" type="text" value={draft.labelB}
+                    placeholder="ex : recette modifiée"
+                    onChange={(e) => setDraft((d) => ({ ...d, labelB: e.target.value }))}
+                  />
+                </div>
               </div>
               <div className="dialog-actions">
                 <button className="btn btn-secondary" onClick={closeDialogs}>Annuler</button>

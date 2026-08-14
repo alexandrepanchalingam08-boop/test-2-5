@@ -22,7 +22,7 @@ function tabStyle(active) {
 }
 
 function emptyDraft() {
-  return { productName: '', day: '', place: '', slotLabels: ['', '', ''] };
+  return { productName: '', day: '', place: '', slotLabels: ['', '', ''], labelA: '', labelB: '' };
 }
 
 export default function AdminPanel({ sessions, activeSession, refresh, onExit }) {
@@ -63,6 +63,8 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
       day: draft.day,
       place: draft.place,
       slotLabels: draft.slotLabels,
+      labelA: draft.labelA,
+      labelB: draft.labelB,
     });
     setCreating(false);
     setDraft(emptyDraft());
@@ -156,6 +158,25 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
               />
             </div>
           ))}
+          <div className="field">
+            <label htmlFor="new-session-label-a">Correspondance du groupe A</label>
+            <input
+              id="new-session-label-a" className="input" type="text" value={draft.labelA}
+              placeholder="ex : recette actuelle"
+              onChange={(e) => setDraft((d) => ({ ...d, labelA: e.target.value }))}
+              style={{ minHeight: 38 }}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="new-session-label-b">Correspondance du groupe B</label>
+            <input
+              id="new-session-label-b" className="input" type="text" value={draft.labelB}
+              placeholder="ex : recette modifiée"
+              onChange={(e) => setDraft((d) => ({ ...d, labelB: e.target.value }))}
+              onKeyDown={(e) => { if (e.key === 'Enter') onCreateSession(); }}
+              style={{ minHeight: 38 }}
+            />
+          </div>
           <button className="btn btn-primary" onClick={onCreateSession} style={{ marginTop: 4 }}>Créer</button>
         </div>
       )}

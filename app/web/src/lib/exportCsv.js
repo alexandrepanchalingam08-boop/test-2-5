@@ -27,6 +27,8 @@ export function exportSessionToCsv(session) {
   rows.push(csvRow(['Produit', session.productName]));
   rows.push(csvRow(['Date', session.day || new Date(session.createdAt).toLocaleDateString('fr-FR')]));
   rows.push(csvRow(['Lieu', session.place || session.storeName || '']));
+  if (session.labelA) rows.push(csvRow(['Groupe A', session.labelA]));
+  if (session.labelB) rows.push(csvRow(['Groupe B', session.labelB]));
   rows.push('');
 
   rows.push(csvRow([

@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { genCodes, genOrder } from './codegen';
 
 const SESSION_SELECT = `
-  id, product_name, store_name, day, place, slot_labels, is_active, created_at,
+  id, product_name, store_name, day, place, slot_labels, label_a, label_b, is_active, created_at,
   participants (
     id, name, creneau, codes, truth_order, created_at,
     submissions ( id, bloc2, bloc3, intensity, description, submitted_at )
@@ -42,6 +42,8 @@ function mapSession(row) {
     day: row.day,
     place: row.place,
     slotLabels: row.slot_labels || [],
+    labelA: row.label_a || '',
+    labelB: row.label_b || '',
     isActive: row.is_active,
     createdAt: row.created_at,
     participants: (row.participants || [])
@@ -59,12 +61,14 @@ export async function fetchSessions() {
   return data.map(mapSession);
 }
 
-export async function createSession({ productName, storeName, day, place, slotLabels }) {
+export async function createSession({ productName, storeName, day, place, slotLabels, labelA, labelB }) {
   const insert = { product_name: productName };
   if (storeName !== undefined) insert.store_name = storeName;
   if (day !== undefined) insert.day = day;
   if (place !== undefined) insert.place = place;
   if (slotLabels !== undefined) insert.slot_labels = slotLabels;
+  if (labelA !== undefined) insert.label_a = labelA;
+  if (labelB !== undefined) insert.label_b = labelB;
   const { data, error } = await supabase.from('sessions').insert(insert).select().single();
   if (error) throw error;
   await setActiveSession(data.id);
@@ -78,6 +82,8 @@ export async function updateSession(id, patch) {
   if (patch.day !== undefined) dbPatch.day = patch.day;
   if (patch.place !== undefined) dbPatch.place = patch.place;
   if (patch.slotLabels !== undefined) dbPatch.slot_labels = patch.slotLabels;
+  if (patch.labelA !== undefined) dbPatch.label_a = patch.labelA;
+  if (patch.labelB !== undefined) dbPatch.label_b = patch.labelB;
   const { error } = await supabase.from('sessions').update(dbPatch).eq('id', id);
   if (error) throw error;
 }

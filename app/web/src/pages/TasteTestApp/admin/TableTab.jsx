@@ -37,6 +37,16 @@ export default function TableTab({ session, refresh }) {
       <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>
         {session.productName} — table de codage
       </span>
+      {(session.labelA || session.labelB) && (
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 12 }}>
+          {session.labelA && (
+            <span><span style={{ color: 'var(--color-correct-text)', fontFamily: 'var(--font-heading)' }}>A</span> = {session.labelA}</span>
+          )}
+          {session.labelB && (
+            <span><span style={{ color: 'var(--color-groupb-text)', fontFamily: 'var(--font-heading)' }}>B</span> = {session.labelB}</span>
+          )}
+        </div>
+      )}
       <div style={{ overflowX: 'auto' }}>
         <table className="table" style={{ minWidth: 340 }}>
           <thead>
