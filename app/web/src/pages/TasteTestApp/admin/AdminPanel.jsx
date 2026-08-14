@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createSession, deleteSession, setActiveSession } from '../../../lib/db.js';
+import { createSession, deleteSession, setActiveSession, updateSession } from '../../../lib/db.js';
 import { TrashIcon, DownloadIcon, LinkIcon } from '../../../components/icons.jsx';
 import { exportSessionToCsv } from '../../../lib/exportCsv.js';
 import { DEFAULT_SLOT_LABELS } from '../../../lib/timeSlots.js';
@@ -42,6 +42,17 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   }, [activeSession, viewSessionId]);
 
   const viewSession = sessions.find((s) => s.id === viewSessionId) || activeSession || sessions[sessions.length - 1] || null;
+
+  const [nameDraft, setNameDraft] = useState(null);
+  useEffect(() => { setNameDraft(null); }, [viewSessionId]);
+  const commitName = async () => {
+    if (nameDraft === null || !viewSession) return;
+    const trimmed = nameDraft.trim();
+    setNameDraft(null);
+    if (!trimmed || trimmed === viewSession.productName) return;
+    await updateSession(viewSession.id, { productName: trimmed });
+    await refresh();
+  };
 
   const sessionOptions = [...sessions].reverse().map((s) => ({
     id: s.id,
@@ -158,6 +169,22 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
         )}
         <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
       </div>
+
+      {!creating && viewSession && (
+        <div style={{ padding: '0 20px 10px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', opacity: 0.55, flex: 'none' }}>
+            Nom du produit :
+          </span>
+          <input
+            className="input" type="text"
+            value={nameDraft ?? viewSession.productName}
+            onChange={(e) => setNameDraft(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+            style={{ flex: 1, fontSize: 13, minHeight: 32, padding: '3px 12px' }}
+          />
+        </div>
+      )}
 
       {!creating && activeSession && (
         <div style={{ padding: '0 20px 10px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>

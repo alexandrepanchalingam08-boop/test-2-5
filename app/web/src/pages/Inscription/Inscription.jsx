@@ -265,12 +265,10 @@ export default function Inscription() {
                     )
                   )}
                 </div>
-                {isNewSession && (
-                  <div className="field">
-                    <label htmlFor="admin-product">Nom du produit</label>
-                    <input id="admin-product" className="input" type="text" value={draft.product} onChange={(e) => setDraft((d) => ({ ...d, product: e.target.value }))} />
-                  </div>
-                )}
+                <div className="field">
+                  <label htmlFor="admin-product">Nom du produit</label>
+                  <input id="admin-product" className="input" type="text" value={draft.product} onChange={(e) => setDraft((d) => ({ ...d, product: e.target.value }))} />
+                </div>
                 <div className="field">
                   <label htmlFor="admin-day">Date</label>
                   <input id="admin-day" className="input" type="text" value={draft.day} onChange={(e) => setDraft((d) => ({ ...d, day: e.target.value }))} />
