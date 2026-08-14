@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createSession, deleteSession, setActiveSession } from '../../../lib/db.js';
 import { TrashIcon, DownloadIcon } from '../../../components/icons.jsx';
 import { exportSessionToCsv } from '../../../lib/exportCsv.js';
@@ -31,21 +31,36 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   const [draft, setDraft] = useState(emptyDraft());
   const [tab, setTab] = useState('participants');
   const [detailId, setDetailId] = useState(null);
+  // Which session's data is browsed in the admin tabs — independent from
+  // which session is "active" (live for participants/Inscription). Only
+  // seeded from activeSession once, on first load; changing the active
+  // session afterward must not yank the admin's current view along with it.
+  const [viewSessionId, setViewSessionId] = useState(activeSession?.id ?? null);
+  useEffect(() => {
+    if (viewSessionId === null && activeSession) setViewSessionId(activeSession.id);
+  }, [activeSession, viewSessionId]);
+
+  const viewSession = sessions.find((s) => s.id === viewSessionId) || activeSession || sessions[sessions.length - 1] || null;
 
   const sessionOptions = [...sessions].reverse().map((s) => ({
     id: s.id,
     label: `${s.productName}${s.day ? ' — ' + s.day : ''}${s.isActive ? ' (Active)' : ''}`,
   }));
 
-  const onSessionSelectChange = async (e) => {
+  const onViewSessionChange = (e) => {
     const val = e.target.value;
     if (val === '__new__') {
       setDraft(emptyDraft());
       setCreating(true);
       return;
     }
+    setCreating(false);
     setDetailId(null);
-    await setActiveSession(val);
+    setViewSessionId(val);
+  };
+
+  const onActiveSessionChange = async (e) => {
+    await setActiveSession(e.target.value);
     await refresh();
   };
 
@@ -58,7 +73,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   const onCreateSession = async () => {
     const name = draft.productName.trim();
     if (!name) return;
-    await createSession({
+    const created = await createSession({
       productName: name,
       storeName: draft.place || activeSession?.storeName,
       day: draft.day,
@@ -70,14 +85,17 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
     setCreating(false);
     setDraft(emptyDraft());
     setDetailId(null);
+    setViewSessionId(created.id);
     await refresh();
   };
 
   const onDeleteViewed = async () => {
-    if (sessions.length <= 1 || !activeSession) return;
-    const remaining = sessions.filter((s) => s.id !== activeSession.id);
-    await deleteSession(activeSession.id);
-    await setActiveSession(remaining[remaining.length - 1].id);
+    if (sessions.length <= 1 || !viewSession) return;
+    const remaining = sessions.filter((s) => s.id !== viewSession.id);
+    const wasActive = viewSession.isActive;
+    await deleteSession(viewSession.id);
+    if (wasActive) await setActiveSession(remaining[remaining.length - 1].id);
+    setViewSessionId(remaining[remaining.length - 1].id);
     setDetailId(null);
     await refresh();
   };
@@ -98,10 +116,10 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-      <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 10px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 4px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
         <select
-          value={creating ? '__new__' : (activeSession?.id ?? '')}
-          onChange={onSessionSelectChange}
+          value={creating ? '__new__' : (viewSessionId ?? '')}
+          onChange={onViewSessionChange}
           className="input"
           style={{ flex: 1, fontFamily: 'var(--font-heading)', fontSize: 14 }}
         >
@@ -110,7 +128,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
             <option key={opt.id} value={opt.id}>{opt.label}</option>
           ))}
         </select>
-        {sessions.length > 1 && activeSession && (
+        {sessions.length > 1 && viewSession && (
           <button
             onClick={onDeleteViewed}
             aria-label="Supprimer la session"
@@ -121,6 +139,24 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
         )}
         <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
       </div>
+
+      {!creating && activeSession && (
+        <div style={{ padding: '0 20px 10px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', opacity: 0.55, flex: 'none' }}>
+            Session active :
+          </span>
+          <select
+            value={activeSession.id}
+            onChange={onActiveSessionChange}
+            className="input"
+            style={{ flex: 1, fontSize: 13, minHeight: 32, padding: '3px 12px' }}
+          >
+            {sessionOptions.map((opt) => (
+              <option key={opt.id} value={opt.id}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {creating && (
         <div style={{ padding: '0 20px 16px', flex: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -187,7 +223,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
         </div>
       )}
 
-      {activeSession && (
+      {!creating && viewSession && (
         <>
           <div style={{ padding: '0 20px 12px', flex: 'none' }}>
             <div style={{ display: 'flex', gap: 4, background: 'var(--color-surface)', borderRadius: 999, padding: 4 }}>
@@ -202,8 +238,8 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
           <div style={{ padding: '0 20px 12px', flex: 'none', display: 'flex', justifyContent: 'flex-end' }}>
             <button
               className="btn btn-ghost"
-              onClick={() => exportSessionToCsv(activeSession)}
-              disabled={activeSession.participants.length === 0}
+              onClick={() => exportSessionToCsv(viewSession)}
+              disabled={viewSession.participants.length === 0}
               style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
             >
               <DownloadIcon />
@@ -213,10 +249,10 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
 
           <div style={{ flex: 1, overflow: 'auto', padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             {tab === 'participants' && (
-              <ParticipantsTab session={activeSession} refresh={refresh} detailId={detailId} setDetailId={setDetailId} />
+              <ParticipantsTab session={viewSession} refresh={refresh} detailId={detailId} setDetailId={setDetailId} />
             )}
-            {tab === 'table' && <TableTab session={activeSession} refresh={refresh} />}
-            {tab === 'results' && <ResultsTab session={activeSession} />}
+            {tab === 'table' && <TableTab session={viewSession} refresh={refresh} />}
+            {tab === 'results' && <ResultsTab session={viewSession} />}
           </div>
         </>
       )}
