@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { createSession, deleteSession, setActiveSession, updateSession } from '../../../lib/db.js';
-import { TrashIcon, DownloadIcon, LinkIcon } from '../../../components/icons.jsx';
+import { TrashIcon, DownloadIcon, LinkIcon, GearIcon } from '../../../components/icons.jsx';
 import { exportSessionToCsv } from '../../../lib/exportCsv.js';
 import { DEFAULT_SLOT_LABELS } from '../../../lib/timeSlots.js';
+import SessionSettingsDialog from '../../../components/SessionSettingsDialog.jsx';
 import ParticipantsTab from './ParticipantsTab.jsx';
 import TableTab from './TableTab.jsx';
 import ResultsTab from './ResultsTab.jsx';
@@ -32,6 +33,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   const [tab, setTab] = useState('participants');
   const [detailId, setDetailId] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   // Which session's data is browsed in the admin tabs — independent from
   // which session is "active" (live for participants/Inscription). Only
   // seeded from activeSession once, on first load; changing the active
@@ -132,10 +134,13 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
 
   if (!activeSession && !creating) {
     return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-        <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 10px', flex: 'none', display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
-        </div>
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
+        <button
+          className="btn btn-secondary" onClick={onExit}
+          style={{ position: 'absolute', top: 'calc(14px + env(safe-area-inset-top))', right: 20, height: 32, fontSize: 12, zIndex: 5 }}
+        >
+          Quitter
+        </button>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 20, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: 14, opacity: 0.75 }}>Aucun test pour le moment.</p>
           <button className="btn btn-primary" onClick={() => { setDraft(emptyDraft()); setCreating(true); }}>+ Nouvelle session</button>
@@ -145,7 +150,13 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
+      <button
+        className="btn btn-secondary" onClick={onExit}
+        style={{ position: 'absolute', top: 'calc(14px + env(safe-area-inset-top))', right: 20, height: 32, fontSize: 12, zIndex: 5 }}
+      >
+        Quitter
+      </button>
       <div style={{ padding: 'calc(56px + env(safe-area-inset-top)) 20px 4px', flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
         <select
           value={creating ? '__new__' : (viewSessionId ?? '')}
@@ -167,7 +178,15 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
             <TrashIcon />
           </button>
         )}
-        <button className="btn btn-secondary" onClick={onExit} style={{ height: 36, fontSize: 12, flex: 'none' }}>Quitter</button>
+        {viewSession && (
+          <button
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Réglages du test"
+            style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--color-divider)', background: 'var(--color-surface)', color: 'var(--color-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, flex: 'none' }}
+          >
+            <GearIcon />
+          </button>
+        )}
       </div>
 
       {!creating && viewSession && (
@@ -309,6 +328,16 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
             {tab === 'results' && <ResultsTab session={viewSession} />}
           </div>
         </>
+      )}
+
+      {settingsOpen && (
+        <SessionSettingsDialog
+          sessions={sessions}
+          activeSession={activeSession}
+          initialSessionId={viewSession?.id ?? null}
+          onClose={() => setSettingsOpen(false)}
+          refresh={refresh}
+        />
       )}
     </div>
   );
