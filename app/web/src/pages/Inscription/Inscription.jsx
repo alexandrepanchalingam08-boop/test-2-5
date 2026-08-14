@@ -68,23 +68,33 @@ export default function Inscription() {
     try {
       const productName = draft.product.trim() || 'Produit à tester';
       if (draft.sessionId && draft.sessionId !== '__new__') {
+        // Editing an existing test's settings no longer activates it —
+        // that's a separate, explicit action now (see "Activer ce test"
+        // below), so a session prepared in advance via its own link
+        // doesn't go live just because someone tweaked its créneaux.
         await updateSession(draft.sessionId, {
           productName, day: draft.day, place: draft.place, slotLabels: draft.slotLabels,
           labelA: draft.labelA, labelB: draft.labelB,
         });
-        await setActiveSession(draft.sessionId);
       } else {
         const created = await createSession({
           productName, storeName: draft.place, day: draft.day, place: draft.place, slotLabels: draft.slotLabels,
           labelA: draft.labelA, labelB: draft.labelB,
         });
-        await setActiveSession(created.id);
+        // Only auto-activates if there was no active session at all yet.
+        if (!activeSession) await setActiveSession(created.id);
       }
       setAdminOpen(false);
       await refresh();
     } finally {
       setSaving(false);
     }
+  };
+
+  const onActivateDraftSession = async () => {
+    if (!draft.sessionId || draft.sessionId === '__new__') return;
+    await setActiveSession(draft.sessionId);
+    await refresh();
   };
 
   const regKey = (slotLabel, idx) => `${currentSession?.id}:${slotLabel}:${idx}`;
@@ -242,6 +252,18 @@ export default function Inscription() {
                       <option key={opt.id} value={opt.id}>{opt.label}</option>
                     ))}
                   </select>
+                  {!isNewSession && (
+                    draft.sessionId === activeSession?.id ? (
+                      <span style={{ fontSize: 12, opacity: 0.6, marginTop: 6, display: 'inline-block' }}>Ce test est actuellement actif.</span>
+                    ) : (
+                      <button
+                        type="button" className="btn btn-ghost" onClick={onActivateDraftSession}
+                        style={{ fontSize: 12, marginTop: 4, paddingInline: 0 }}
+                      >
+                        Activer ce test
+                      </button>
+                    )
+                  )}
                 </div>
                 {isNewSession && (
                   <div className="field">
