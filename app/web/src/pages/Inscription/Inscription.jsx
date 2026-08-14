@@ -8,7 +8,7 @@ import { DEFAULT_SLOT_LABELS } from '../../lib/timeSlots.js';
 const SPOTS_PER_SLOT = 4;
 
 function emptyDraft() {
-  return { sessionId: '__new__', product: '', day: '', place: '', slotLabels: [...DEFAULT_SLOT_LABELS], labelA: '', labelB: '' };
+  return { sessionId: '__new__', product: '', day: '', place: '', slotLabels: ['', '', ''], labelA: '', labelB: '' };
 }
 
 export default function Inscription() {
@@ -30,7 +30,7 @@ export default function Inscription() {
       product: session?.productName ?? '',
       day: session?.day ?? '',
       place: session?.place ?? '',
-      slotLabels: session?.slotLabels?.length ? [...session.slotLabels] : [...DEFAULT_SLOT_LABELS],
+      slotLabels: session?.slotLabels?.length ? [...session.slotLabels] : ['', '', ''],
       labelA: session?.labelA ?? '',
       labelB: session?.labelB ?? '',
     });
@@ -239,7 +239,13 @@ export default function Inscription() {
                 {draft.slotLabels.map((val, i) => (
                   <div className="field" key={i}>
                     <label>Créneau {i + 1}</label>
-                    <input className="input" type="text" value={val} onChange={(e) => setSlotLabel(i, e.target.value)} />
+                    <select className="input" value={val} onChange={(e) => setSlotLabel(i, e.target.value)}>
+                      <option value="">Choisir un créneau…</option>
+                      {!!val && !DEFAULT_SLOT_LABELS.includes(val) && <option value={val}>{val}</option>}
+                      {DEFAULT_SLOT_LABELS.map((label) => (
+                        <option key={label} value={label}>{label}</option>
+                      ))}
+                    </select>
                   </div>
                 ))}
                 <div className="field">

@@ -23,7 +23,7 @@ function tabStyle(active) {
 }
 
 function emptyDraft() {
-  return { productName: '', day: '', place: '', slotLabels: [...DEFAULT_SLOT_LABELS], labelA: '', labelB: '' };
+  return { productName: '', day: '', place: '', slotLabels: ['', '', ''], labelA: '', labelB: '' };
 }
 
 export default function AdminPanel({ sessions, activeSession, refresh, onExit }) {
@@ -151,12 +151,17 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
           {draft.slotLabels.map((val, i) => (
             <div className="field" key={i}>
               <label>Créneau {i + 1}</label>
-              <input
-                className="input" type="text" value={val}
+              <select
+                className="input" value={val}
                 onChange={(e) => setSlotLabel(i, e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') onCreateSession(); }}
                 style={{ minHeight: 38 }}
-              />
+              >
+                <option value="">Choisir un créneau…</option>
+                {!!val && !DEFAULT_SLOT_LABELS.includes(val) && <option value={val}>{val}</option>}
+                {DEFAULT_SLOT_LABELS.map((label) => (
+                  <option key={label} value={label}>{label}</option>
+                ))}
+              </select>
             </div>
           ))}
           <div className="field">
