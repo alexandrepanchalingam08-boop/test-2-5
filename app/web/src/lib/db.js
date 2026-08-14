@@ -109,12 +109,13 @@ export async function updateParticipant(id, patch) {
 export async function registerParticipant(sessionId, { name, creneau }) {
   const { data: existing, error: fetchErr } = await supabase
     .from('participants')
-    .select('codes')
+    .select('codes, truth_order')
     .eq('session_id', sessionId);
   if (fetchErr) throw fetchErr;
   const used = new Set((existing || []).flatMap((p) => p.codes || []));
   const codes = genCodes(used, 5);
-  const truthOrder = genOrder();
+  const existingOrders = (existing || []).map((p) => p.truth_order || []).filter((o) => o.length > 0);
+  const truthOrder = genOrder(existingOrders);
   const { data, error } = await supabase
     .from('participants')
     .insert({ session_id: sessionId, name, creneau, codes, truth_order: truthOrder })
