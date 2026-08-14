@@ -88,7 +88,7 @@ export default function ParticipantFlow({ session, onOpenAdminGate }) {
     };
   }, [step]);
 
-  const nameOptions = session.participants.map((p) => p.name);
+  const nameOptions = session.participants.filter((p) => !p.submission).map((p) => p.name);
   const participant = session.participants.find((p) => p.name === selectedName) || null;
   const codes = participant ? participant.codes : [];
 
