@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export const ADMIN_CODE = '2026';
+export const ADMIN_CODE = 'QuickR&D2026';
 
 export default function AdminGate({ onSuccess, onExit }) {
   const [code, setCode] = useState('');
