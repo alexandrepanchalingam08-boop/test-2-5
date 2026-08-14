@@ -11,11 +11,19 @@ export default function ResultsTab({ session }) {
     : 0;
   const keywordChips = extractKeywords(submissions.map((s) => s.description));
 
+  // Threshold for "conclusive" (few enough correct answers that the
+  // difference isn't reliably perceived) scales with panel size.
+  const threshold = total <= 8 ? 3 : 4;
+  const isConclusive = correctCount <= threshold;
   const resultsBadgeStyle = {
     width: 96, height: 96, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: correctCount <= 4 ? 'var(--color-correct-bg)' : 'var(--color-accent-100)',
-    border: `3px solid ${correctCount <= 4 ? 'var(--color-correct-text)' : 'var(--color-accent)'}`,
-    color: correctCount <= 4 ? 'var(--color-correct-text)' : 'var(--color-accent-800)',
+    background: isConclusive ? 'var(--color-correct-bg)' : 'var(--color-accent-100)',
+    border: `3px solid ${isConclusive ? 'var(--color-correct-text)' : 'var(--color-accent)'}`,
+    color: isConclusive ? 'var(--color-correct-text)' : 'var(--color-accent-800)',
+  };
+  const interpretationStyle = {
+    fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 700,
+    color: isConclusive ? 'var(--color-correct-text)' : 'var(--color-accent-800)',
   };
 
   return (
@@ -27,6 +35,9 @@ export default function ResultsTab({ session }) {
         <div style={resultsBadgeStyle}>
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: 24 }}>{correctCount}/{total}</span>
         </div>
+        {total > 0 && (
+          <span style={interpretationStyle}>{isConclusive ? 'Test concluant' : 'Test non concluant'}</span>
+        )}
       </div>
       {submissions.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginTop: -8 }}>
