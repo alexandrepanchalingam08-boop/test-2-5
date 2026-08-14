@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createSession, deleteSession, setActiveSession } from '../../../lib/db.js';
-import { TrashIcon, DownloadIcon } from '../../../components/icons.jsx';
+import { TrashIcon, DownloadIcon, LinkIcon } from '../../../components/icons.jsx';
 import { exportSessionToCsv } from '../../../lib/exportCsv.js';
 import { DEFAULT_SLOT_LABELS } from '../../../lib/timeSlots.js';
 import ParticipantsTab from './ParticipantsTab.jsx';
@@ -31,6 +31,7 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
   const [draft, setDraft] = useState(emptyDraft());
   const [tab, setTab] = useState('participants');
   const [detailId, setDetailId] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   // Which session's data is browsed in the admin tabs — independent from
   // which session is "active" (live for participants/Inscription). Only
   // seeded from activeSession once, on first load; changing the active
@@ -92,6 +93,19 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
     setDetailId(null);
     setViewSessionId(created.id);
     await refresh();
+  };
+
+  const onCopyLink = async () => {
+    if (!viewSession) return;
+    const url = `${window.location.origin}/inscription/${viewSession.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt('Copiez ce lien :', url);
+      return;
+    }
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   const onDeleteViewed = async () => {
@@ -240,7 +254,15 @@ export default function AdminPanel({ sessions, activeSession, refresh, onExit })
             </div>
           </div>
 
-          <div style={{ padding: '0 20px 12px', flex: 'none', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ padding: '0 20px 12px', flex: 'none', display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
+            <button
+              className="btn btn-ghost"
+              onClick={onCopyLink}
+              style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <LinkIcon />
+              {linkCopied ? 'Lien copié !' : "Lien d'inscription"}
+            </button>
             <button
               className="btn btn-ghost"
               onClick={() => exportSessionToCsv(viewSession)}

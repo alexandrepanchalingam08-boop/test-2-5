@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useSessions } from '../../lib/SessionsContext.jsx';
 import { createSession, updateSession, setActiveSession, registerParticipant, removeParticipant } from '../../lib/db.js';
 import { ADMIN_CODE } from '../../components/AdminGate.jsx';
@@ -12,7 +13,14 @@ function emptyDraft() {
 }
 
 export default function Inscription() {
+  const { sessionId: urlSessionId } = useParams();
   const { sessions, activeSession, loading, refresh } = useSessions();
+  // A URL like /inscription/<id> pins this page to that exact session,
+  // regardless of which one is globally active — lets each session have
+  // its own stable sign-up link. Plain /inscription keeps following
+  // whichever session is active, as before.
+  const currentSession = urlSessionId ? sessions.find((s) => s.id === urlSessionId) : activeSession;
+  const sessionNotFound = !!urlSessionId && !loading && !currentSession;
   const [gateOpen, setGateOpen] = useState(false);
   const [gateCode, setGateCode] = useState('');
   const [gateError, setGateError] = useState(false);
@@ -40,7 +48,7 @@ export default function Inscription() {
     if (gateCode !== ADMIN_CODE) { setGateError(true); return; }
     setGateOpen(false);
     setAdminOpen(true);
-    loadDraftFromSession(activeSession);
+    loadDraftFromSession(currentSession);
   };
 
   const onDraftSessionChange = (e) => {
@@ -79,17 +87,17 @@ export default function Inscription() {
     }
   };
 
-  const regKey = (slotLabel, idx) => `${activeSession?.id}:${slotLabel}:${idx}`;
+  const regKey = (slotLabel, idx) => `${currentSession?.id}:${slotLabel}:${idx}`;
   const setRegDraft = (slotLabel, idx, value) => setRegDrafts((d) => ({ ...d, [regKey(slotLabel, idx)]: value }));
   const register = async (slotLabel, idx) => {
-    if (!activeSession) return;
+    if (!currentSession) return;
     const key = regKey(slotLabel, idx);
     const name = (regDrafts[key] || '').trim();
     if (!name) return;
-    const inSlot = activeSession.participants.filter((p) => p.creneau === slotLabel).length;
+    const inSlot = currentSession.participants.filter((p) => p.creneau === slotLabel).length;
     if (inSlot >= SPOTS_PER_SLOT) return;
     setRegDrafts((d) => ({ ...d, [key]: '' }));
-    await registerParticipant(activeSession.id, { name, creneau: slotLabel });
+    await registerParticipant(currentSession.id, { name, creneau: slotLabel });
     await refresh();
   };
   const unregister = async (participantId) => {
@@ -101,7 +109,7 @@ export default function Inscription() {
     return <div className="app-shell" style={{ maxWidth: 640, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p style={{ opacity: 0.7 }}>Chargement…</p></div>;
   }
 
-  const slotLabels = activeSession?.slotLabels?.length ? activeSession.slotLabels : DEFAULT_SLOT_LABELS;
+  const slotLabels = currentSession?.slotLabels?.length ? currentSession.slotLabels : DEFAULT_SLOT_LABELS;
   const sessionOptions = [...sessions].reverse().map((s) => ({ id: s.id, label: s.productName }));
   const isNewSession = !draft.sessionId || draft.sessionId === '__new__';
 
@@ -109,14 +117,14 @@ export default function Inscription() {
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '56px 24px', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 28 }}>
 
-        {activeSession ? (
+        {currentSession ? (
           <>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span className="tag tag-accent" style={{ alignSelf: 'flex-start' }}>Inscription</span>
-                <h1 style={{ margin: 0 }}>{activeSession.productName}</h1>
+                <h1 style={{ margin: 0 }}>{currentSession.productName}</h1>
                 <span style={{ fontSize: 21, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', opacity: 0.75 }}>
-                  {activeSession.day || new Date(activeSession.createdAt).toLocaleDateString('fr-FR')}
+                  {currentSession.day || new Date(currentSession.createdAt).toLocaleDateString('fr-FR')}
                 </span>
                 <p style={{ margin: '4px 0 0', fontSize: 14, opacity: 0.7 }}>Merci de vous inscrire dans l'un des créneaux ci-dessous.</p>
               </div>
@@ -126,7 +134,7 @@ export default function Inscription() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               {slotLabels.map((label) => {
                 const hasLabel = !!label && !!label.trim();
-                const list = activeSession.participants.filter((p) => p.creneau === label);
+                const list = currentSession.participants.filter((p) => p.creneau === label);
                 const full = list.length >= SPOTS_PER_SLOT;
                 const spots = Array.from({ length: SPOTS_PER_SLOT }).map((_, idx) => list[idx]);
                 return (
@@ -181,6 +189,15 @@ export default function Inscription() {
               })}
             </div>
           </>
+        ) : sessionNotFound ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
+            <span className="tag tag-accent">Inscription</span>
+            <h1 style={{ margin: 0 }}>Test introuvable</h1>
+            <p style={{ margin: 0, fontSize: 14, opacity: 0.75 }}>
+              Ce lien d'inscription ne correspond à aucun test existant — il a peut-être été supprimé.
+            </p>
+            <button className="btn btn-primary" onClick={openAdmin}>Admin</button>
+          </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
             <span className="tag tag-accent">Inscription</span>

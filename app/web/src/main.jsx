@@ -13,6 +13,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/" element={<TasteTestApp />} />
           <Route path="/inscription" element={<Inscription />} />
+          <Route path="/inscription/:sessionId" element={<Inscription />} />
         </Routes>
       </SessionsProvider>
     </BrowserRouter>
