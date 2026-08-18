@@ -1,8 +1,16 @@
 import { buildAdminRow } from '../../../lib/adminRows.js';
-import { BackIcon } from '../../../components/icons.jsx';
+import { BackIcon, TrashIcon } from '../../../components/icons.jsx';
+import { removeParticipant } from '../../../lib/db.js';
 
-export default function ParticipantsTab({ session, detailId, setDetailId }) {
+export default function ParticipantsTab({ session, refresh, detailId, setDetailId }) {
   const rows = session.participants.map(buildAdminRow);
+
+  const onDeleteParticipant = async (id, name) => {
+    if (!window.confirm(`Supprimer ${name} et toutes ses réponses associées ? Cette action est irréversible.`)) return;
+    await removeParticipant(id);
+    setDetailId(null);
+    await refresh();
+  };
 
   if (detailId) {
     const row = rows.find((r) => r.id === detailId);
@@ -36,6 +44,14 @@ export default function ParticipantsTab({ session, detailId, setDetailId }) {
           ) : (
             <span style={{ fontSize: 13, opacity: 0.6 }}>Ce participant n'a pas encore répondu.</span>
           )}
+          <div style={{ height: 1, background: 'var(--color-divider)', margin: '4px 0' }} />
+          <button
+            onClick={() => onDeleteParticipant(row.id, row.name)}
+            style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', color: 'var(--color-accent-700)', fontSize: 13, cursor: 'pointer', padding: 0 }}
+          >
+            <TrashIcon />
+            Supprimer ce participant
+          </button>
         </div>
       </div>
     );
