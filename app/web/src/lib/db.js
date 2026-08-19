@@ -139,6 +139,37 @@ export async function removeParticipant(id) {
   if (error) throw error;
 }
 
+// Regenerates codes + truth_order for every participant in `session` who
+// hasn't submitted yet, balanced per créneau exactly as registerParticipant
+// does — brings a session's already-registered, not-yet-tested participants
+// in line with the per-créneau balance rule. Participants who already
+// submitted are left untouched (their answer was scored against their
+// actual codes; changing the truth after the fact would invalidate it) —
+// their codes/truth still count toward code-uniqueness and créneau balance
+// for everyone else.
+export async function rebalanceUnsubmittedCodes(session) {
+  const fixed = session.participants.filter((p) => p.submission);
+  const toReassign = session.participants.filter((p) => !p.submission);
+
+  const usedCodes = new Set(fixed.flatMap((p) => p.codes));
+  const ordersByCreneau = {};
+  for (const p of fixed) {
+    (ordersByCreneau[p.creneau] ??= []).push(p.truthOrder);
+  }
+
+  for (const p of toReassign) {
+    const codes = genCodes(usedCodes, 5);
+    codes.forEach((c) => usedCodes.add(c));
+    const sameCreneauOrders = ordersByCreneau[p.creneau] ?? (ordersByCreneau[p.creneau] = []);
+    const truthOrder = genOrder(sameCreneauOrders);
+    sameCreneauOrders.push(truthOrder);
+    const { error } = await supabase.from('participants').update({ codes, truth_order: truthOrder }).eq('id', p.id);
+    if (error) throw error;
+  }
+
+  return toReassign.length;
+}
+
 export async function submitAnswer(participantId, sessionId, { bloc2, bloc3, intensity, description }) {
   const { error } = await supabase
     .from('submissions')

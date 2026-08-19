@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { updateParticipant } from '../../../lib/db.js';
+import { updateParticipant, rebalanceUnsubmittedCodes } from '../../../lib/db.js';
 
 function letterStyle(letter) {
   return {
@@ -16,6 +16,22 @@ function codeStyle(letter) {
 export default function TableTab({ session, refresh }) {
   const [drafts, setDrafts] = useState({});
   const [creneauFilter, setCreneauFilter] = useState('');
+  const [rebalancing, setRebalancing] = useState(false);
+
+  const unsubmittedCount = session.participants.filter((p) => !p.submission).length;
+  const onRebalance = async () => {
+    if (!window.confirm(
+      `Réattribuer codes et groupe A/B pour ${unsubmittedCount} participant(s) n'ayant pas encore répondu, ` +
+      `pour équilibrer chaque créneau ? Les participants ayant déjà répondu ne sont pas touchés.`,
+    )) return;
+    setRebalancing(true);
+    try {
+      await rebalanceUnsubmittedCodes(session);
+      await refresh();
+    } finally {
+      setRebalancing(false);
+    }
+  };
 
   const valueOf = (p, field) => drafts[`${p.id}:${field}`] ?? p[field];
   const onChange = (p, field, value) => setDrafts((d) => ({ ...d, [`${p.id}:${field}`]: value }));
@@ -57,9 +73,19 @@ export default function TableTab({ session, refresh }) {
 
   return (
     <>
-      <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>
-        {session.productName} — table de codage
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>
+          {session.productName} — table de codage
+        </span>
+        {unsubmittedCount > 0 && (
+          <button
+            className="btn btn-ghost" onClick={onRebalance} disabled={rebalancing}
+            style={{ fontSize: 11, flex: 'none' }}
+          >
+            {rebalancing ? 'Réattribution…' : 'Rééquilibrer les codes'}
+          </button>
+        )}
+      </div>
       {orderedCreneaux.length > 1 && (
         <div className="field" style={{ maxWidth: 220 }}>
           <label htmlFor="table-creneau-filter">Filtrer par créneau</label>
