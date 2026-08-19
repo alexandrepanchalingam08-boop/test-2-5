@@ -48,6 +48,13 @@ export default function TableTab({ session, refresh }) {
     ? session.participants.filter((p) => p.creneau === creneauFilter)
     : session.participants;
 
+  const countLetter = (letter) => filteredParticipants.reduce(
+    (sum, p) => sum + p.truthOrder.filter((o) => o === letter).length, 0,
+  );
+  const totalA = countLetter('A');
+  const totalB = countLetter('B');
+  const formatProduction = (n) => (Number.isInteger(n / 2) ? String(n / 2) : (n / 2).toFixed(1));
+
   return (
     <>
       <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>
@@ -122,6 +129,17 @@ export default function TableTab({ session, refresh }) {
             ))}
           </tbody>
         </table>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>Production</span>
+        <div style={{ display: 'flex', gap: 20 }}>
+          <span style={{ fontSize: 14 }}>
+            <span style={{ color: 'var(--color-correct-text)', fontFamily: 'var(--font-heading)' }}>A</span> : {formatProduction(totalA)}
+          </span>
+          <span style={{ fontSize: 14 }}>
+            <span style={{ color: 'var(--color-groupb-text)', fontFamily: 'var(--font-heading)' }}>B</span> : {formatProduction(totalB)}
+          </span>
+        </div>
       </div>
     </>
   );
