@@ -345,7 +345,7 @@ function ThankYouStep({ participant, bloc2 }) {
   }));
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 16, padding: '40px 16px', position: 'relative', overflow: 'hidden' }}>
-      {hearts.map((h) => <span key={h.key} style={h.style}>❤️</span>)}
+      {hearts.map((h) => <span key={h.key} style={h.style}>🍔</span>)}
       <span
         style={{
           fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 22, letterSpacing: '.05em',
