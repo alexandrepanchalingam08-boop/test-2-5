@@ -39,6 +39,7 @@ const blockStyle = {
 export default function ParticipantFlow({ session, onOpenAdminGate }) {
   const [step, setStep] = useState(0);
   const [selectedName, setSelectedName] = useState('');
+  const [creneauFilter, setCreneauFilter] = useState('');
   const [locations, setLocations] = useState({});
   const [dragging, setDragging] = useState(null);
   const [intensity, setIntensity] = useState(50);
@@ -88,9 +89,32 @@ export default function ParticipantFlow({ session, onOpenAdminGate }) {
     };
   }, [step]);
 
-  const nameOptions = session.participants.filter((p) => !p.submission).map((p) => p.name);
+  const availableParticipants = session.participants.filter((p) => !p.submission);
+  const creneauxPresent = [...new Set(availableParticipants.map((p) => p.creneau))];
+  // Order créneaux to match the session's own slot order where possible,
+  // so the filter/groups read chronologically rather than by registration order.
+  const orderedCreneaux = [
+    ...session.slotLabels.filter((c) => creneauxPresent.includes(c)),
+    ...creneauxPresent.filter((c) => !session.slotLabels.includes(c)),
+  ];
+  const filteredParticipants = creneauFilter
+    ? availableParticipants.filter((p) => p.creneau === creneauFilter)
+    : availableParticipants;
+  const nameGroups = orderedCreneaux
+    .map((creneau) => ({ creneau, names: filteredParticipants.filter((p) => p.creneau === creneau).map((p) => p.name) }))
+    .filter((g) => g.names.length > 0);
+
   const participant = session.participants.find((p) => p.name === selectedName) || null;
   const codes = participant ? participant.codes : [];
+
+  const onCreneauFilterChange = (e) => {
+    const value = e.target.value;
+    setCreneauFilter(value);
+    if (value && participant && participant.creneau !== value) {
+      setSelectedName('');
+      setLocations({});
+    }
+  };
 
   const onNameChange = (e) => {
     const name = e.target.value;
@@ -150,12 +174,27 @@ export default function ParticipantFlow({ session, onOpenAdminGate }) {
               Test de discrimination<br />2 parmi 5
             </h1>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, opacity: 0.75, maxWidth: 280 }}>Sélectionnez votre nom pour commencer.</p>
+            {orderedCreneaux.length > 1 && (
+              <div className="field" style={{ marginTop: 6 }}>
+                <label htmlFor="creneau-filter">Créneau</label>
+                <select id="creneau-filter" className="input" value={creneauFilter} onChange={onCreneauFilterChange}>
+                  <option value="">Tous les créneaux</option>
+                  {orderedCreneaux.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="field" style={{ marginTop: 6 }}>
               <label htmlFor="name-select">Votre nom</label>
               <select id="name-select" className="input" value={selectedName} onChange={onNameChange}>
                 <option value="">Choisissez votre nom</option>
-                {nameOptions.map((n) => (
-                  <option key={n} value={n}>{n}</option>
+                {nameGroups.map((g) => (
+                  <optgroup key={g.creneau} label={g.creneau}>
+                    {g.names.map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
