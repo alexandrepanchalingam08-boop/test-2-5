@@ -110,13 +110,21 @@ export async function updateParticipant(id, patch) {
 export async function registerParticipant(sessionId, { name, creneau }) {
   const { data: existing, error: fetchErr } = await supabase
     .from('participants')
-    .select('codes, truth_order')
+    .select('codes, truth_order, creneau')
     .eq('session_id', sessionId);
   if (fetchErr) throw fetchErr;
   const used = new Set((existing || []).flatMap((p) => p.codes || []));
   const codes = genCodes(used, 5);
-  const existingOrders = (existing || []).map((p) => p.truth_order || []).filter((o) => o.length > 0);
-  const truthOrder = genOrder(existingOrders);
+  // Balanced within this créneau specifically (not the whole session): a
+  // full 4-person créneau then always nets exactly 2 A-minority + 2
+  // B-minority, so per-créneau production counts (total matching codes / 2)
+  // come out equal and whole — balancing session-wide wouldn't guarantee
+  // that for any one créneau, since registration order interleaves slots.
+  const sameCreneauOrders = (existing || [])
+    .filter((p) => p.creneau === creneau)
+    .map((p) => p.truth_order || [])
+    .filter((o) => o.length > 0);
+  const truthOrder = genOrder(sameCreneauOrders);
   const { data, error } = await supabase
     .from('participants')
     .insert({ session_id: sessionId, name, creneau, codes, truth_order: truthOrder })
