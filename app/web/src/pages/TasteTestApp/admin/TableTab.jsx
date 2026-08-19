@@ -15,6 +15,7 @@ function codeStyle(letter) {
 
 export default function TableTab({ session, refresh }) {
   const [drafts, setDrafts] = useState({});
+  const [creneauFilter, setCreneauFilter] = useState('');
 
   const valueOf = (p, field) => drafts[`${p.id}:${field}`] ?? p[field];
   const onChange = (p, field, value) => setDrafts((d) => ({ ...d, [`${p.id}:${field}`]: value }));
@@ -38,11 +39,35 @@ export default function TableTab({ session, refresh }) {
     refresh();
   };
 
+  const creneauxPresent = [...new Set(session.participants.map((p) => p.creneau))];
+  const orderedCreneaux = [
+    ...session.slotLabels.filter((c) => creneauxPresent.includes(c)),
+    ...creneauxPresent.filter((c) => !session.slotLabels.includes(c)),
+  ];
+  const filteredParticipants = creneauFilter
+    ? session.participants.filter((p) => p.creneau === creneauFilter)
+    : session.participants;
+
   return (
     <>
       <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>
         {session.productName} — table de codage
       </span>
+      {orderedCreneaux.length > 1 && (
+        <div className="field" style={{ maxWidth: 220 }}>
+          <label htmlFor="table-creneau-filter">Filtrer par créneau</label>
+          <select
+            id="table-creneau-filter" className="input" value={creneauFilter}
+            onChange={(e) => setCreneauFilter(e.target.value)}
+            style={{ minHeight: 32, fontSize: 13, padding: '3px 12px' }}
+          >
+            <option value="">Tous les créneaux</option>
+            {orderedCreneaux.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+      )}
       {(session.labelA || session.labelB) && (
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 12 }}>
           {session.labelA && (
@@ -59,7 +84,7 @@ export default function TableTab({ session, refresh }) {
             <tr><th>#</th><th>Nom</th><th>Créneau</th><th>Ordre</th></tr>
           </thead>
           <tbody>
-            {session.participants.map((p, i) => (
+            {filteredParticipants.map((p, i) => (
               <tr key={p.id}>
                 <td>{i + 1}</td>
                 <td>
