@@ -337,6 +337,7 @@ function ThankYouStep({ participant, bloc2 }) {
   const correct = isCorrect(participant, bloc2);
   const hearts = Array.from({ length: 8 }).map((_, i) => ({
     key: i,
+    emoji: i % 2 === 0 ? '🍔' : '❤️',
     style: {
       position: 'absolute', bottom: '-10%', left: `${8 + i * 11}%`,
       fontSize: 18 + (i % 3) * 8, animation: `heartFloat ${2.4 + (i % 4) * 0.4}s ease-in ${i * 0.15}s infinite`,
@@ -345,7 +346,7 @@ function ThankYouStep({ participant, bloc2 }) {
   }));
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 16, padding: '40px 16px', position: 'relative', overflow: 'hidden' }}>
-      {hearts.map((h) => <span key={h.key} style={h.style}>🍔</span>)}
+      {hearts.map((h) => <span key={h.key} style={h.style}>{h.emoji}</span>)}
       <span
         style={{
           fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 22, letterSpacing: '.05em',
