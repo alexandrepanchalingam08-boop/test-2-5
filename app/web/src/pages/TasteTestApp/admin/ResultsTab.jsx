@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { buildAdminRow } from '../../../lib/adminRows.js';
 import { extractKeywords } from '../../../lib/keywords.js';
 
 export default function ResultsTab({ session }) {
+  const [selectedWord, setSelectedWord] = useState(null);
   const rows = session.participants.map(buildAdminRow);
   const correctCount = rows.filter((r) => r.correctBool === true).length;
   const total = session.participants.length;
@@ -9,7 +11,11 @@ export default function ResultsTab({ session }) {
   const avgIntensity = submissions.length
     ? Math.round(submissions.reduce((sum, s) => sum + (s.intensity || 0), 0) / submissions.length)
     : 0;
-  const keywordChips = extractKeywords(submissions.map((s) => s.description));
+  const keywordEntries = session.participants
+    .filter((p) => p.submission)
+    .map((p) => ({ name: p.name, description: p.submission.description }));
+  const keywordChips = extractKeywords(keywordEntries);
+  const selectedChip = keywordChips.find((kw) => kw.word === selectedWord) ?? null;
 
   // Threshold for "conclusive" (few enough correct answers that the
   // difference isn't reliably perceived) scales with panel size.
@@ -50,9 +56,30 @@ export default function ResultsTab({ session }) {
           <span style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.55 }}>Mots-clés fréquents</span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {keywordChips.map((kw) => (
-              <span key={kw.word} className="tag tag-accent">{kw.word} ({kw.count})</span>
+              <span
+                key={kw.word}
+                className="tag tag-accent"
+                onClick={() => setSelectedWord((w) => (w === kw.word ? null : kw.word))}
+                style={{
+                  cursor: 'pointer',
+                  outline: selectedWord === kw.word ? '2px solid var(--color-accent)' : 'none',
+                  outlineOffset: 1,
+                }}
+              >
+                {kw.word} ({kw.count})
+              </span>
             ))}
           </div>
+          {selectedChip && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 12, marginTop: 2 }}>
+              {selectedChip.comments.map((c, i) => (
+                <div key={i} style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+                  <span style={{ fontFamily: 'var(--font-heading)', opacity: 0.7 }}>{c.name} : </span>
+                  <span style={{ fontStyle: 'italic' }}>« {c.description} »</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </>

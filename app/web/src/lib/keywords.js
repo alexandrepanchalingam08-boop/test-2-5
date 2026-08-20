@@ -1,24 +1,45 @@
-export const STOPWORDS = new Set([
-  'le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'ou', 'que', 'qui', 'quoi', 'est', 'dans', 'pour',
-  'avec', 'plus', 'moins', 'tres', 'peu', 'pas', 'ne', 'on', 'il', 'elle', 'ils', 'elles', 'ce', 'cette', 'ces',
-  'cet', 'au', 'aux', 'a', 'en', 'se', 'sa', 'son', 'ses', 'leur', 'leurs', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes',
-  'notre', 'nos', 'votre', 'vos', 'd', 'l', 'j', 'y', 'n', 's', 't', 'c', 'qu', 'ete', 'etais', 'etait', 'etre',
-  'avoir', 'nous', 'vous', 'je', 'tu', 'mais', 'donc', 'or', 'ni', 'car', 'si', 'comme', 'sans', 'sous', 'sur',
-  'entre', 'vers', 'chez', 'par', 'trop', 'bien', 'fait', 'faire', 'cela', 'ca', 'tout', 'toute', 'tous', 'toutes',
-  'autre', 'autres', 'meme', 'aussi', 'encore', 'deja', 'ici', 'on', 'ont', 'avons', 'avez', 'ai', 'as',
+// Whitelist of burger/food vocabulary — only words in this list are ever
+// surfaced as "frequent keywords", instead of any word that happens to
+// repeat. Stored accent-stripped/lowercase to match the normalized text
+// they're matched against.
+export const FOOD_LEXICON = new Set([
+  // pain / bread
+  'pain', 'bun', 'buns', 'brioche', 'sesame', 'mie', 'croute', 'croustille', 'panure',
+  // viande / protein
+  'viande', 'steak', 'boeuf', 'poulet', 'chicken', 'bacon', 'jambon', 'poisson', 'saumon',
+  'dinde', 'porc', 'veau', 'agneau', 'galette', 'burger', 'burgers', 'hamburger', 'cheeseburger',
+  'oeuf', 'oeufs',
+  // fromage
+  'fromage', 'cheddar', 'mozzarella', 'emmental', 'chevre', 'comte', 'gruyere', 'raclette', 'creme', 'cremeux', 'cremeuse',
+  // sauces / condiments
+  'sauce', 'sauces', 'ketchup', 'mayonnaise', 'mayo', 'moutarde', 'barbecue', 'algerienne',
+  'samourai', 'andalouse', 'vinaigrette', 'harissa', 'piquante', 'epicee',
+  // legumes / crudites
+  'salade', 'tomate', 'tomates', 'oignon', 'oignons', 'cornichon', 'cornichons', 'crudites',
+  'laitue', 'roquette', 'avocat', 'poivron', 'champignon', 'champignons', 'concombre', 'carotte',
+  // texture / gout
+  'croustillant', 'croustillante', 'croquant', 'croquante', 'fondant', 'fondante', 'juteux', 'juteuse',
+  'tendre', 'seche', 'sec', 'moelleux', 'moelleuse', 'epice', 'epices', 'sucre', 'sucree', 'sale', 'salee',
+  'acide', 'amer', 'amere', 'fume', 'fumee', 'grille', 'grillee', 'gras', 'grasse', 'fade', 'relevee',
+  'releve', 'onctueux', 'onctueuse', 'filandreux', 'caoutchouteux', 'gout', 'saveur', 'texture', 'odeur',
+  // accompagnement
+  'frites', 'patate', 'patates',
 ]);
 
-export function extractKeywords(descriptions) {
+export function extractKeywords(entries) {
   const counts = {};
-  for (const desc of descriptions) {
-    if (!desc) continue;
-    const norm = desc.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    const words = norm.split(/[^a-z]+/).filter((w) => w.length >= 4 && !STOPWORDS.has(w));
-    for (const w of words) counts[w] = (counts[w] || 0) + 1;
+  const commentsByWord = {};
+  for (const { name, description } of entries) {
+    if (!description) continue;
+    const norm = description.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const words = new Set(norm.split(/[^a-z]+/).filter((w) => FOOD_LEXICON.has(w)));
+    for (const w of words) {
+      counts[w] = (counts[w] || 0) + 1;
+      (commentsByWord[w] ??= []).push({ name, description });
+    }
   }
   return Object.entries(counts)
-    .filter(([, c]) => c >= 1)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
-    .map(([word, count]) => ({ word, count }));
+    .map(([word, count]) => ({ word, count, comments: commentsByWord[word] }));
 }
