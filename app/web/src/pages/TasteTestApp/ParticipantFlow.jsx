@@ -63,20 +63,35 @@ export default function ParticipantFlow({ session, onOpenAdminGate }) {
     const onUp = () => {
       const d = draggingRef.current;
       if (!d) return;
-      const { code, x, y } = d;
-      const inRect = (ref) => {
-        if (!ref.current) return false;
-        const r = ref.current.getBoundingClientRect();
-        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-      };
+      const { code, x, y, startX, startY } = d;
       const locs = { ...locationsRef.current };
       const countIn = (loc) => Object.entries(locs).filter(([c, l]) => l === loc && c !== code).length;
-      const overB2 = inRect(block2Ref);
-      const overB3 = inRect(block3Ref);
-      let newLoc = 'pool';
-      if (overB2 && countIn('b2') < 2) newLoc = 'b2';
-      else if (overB3 && countIn('b3') < 3) newLoc = 'b3';
-      else if (overB2 || overB3) newLoc = locs[code];
+
+      // A tap (negligible movement) cycles the code pool -> Bloc de 2 ->
+      // Bloc de 3 -> pool instead of using the drop position — dragging
+      // isn't a discoverable gesture on touch devices, and this gives
+      // anyone who just taps the numbers (as most participants do) a way
+      // to sort them without ever needing to drag.
+      const movedFar = Math.hypot(x - startX, y - startY) > 8;
+      let newLoc;
+      if (!movedFar) {
+        const current = locs[code];
+        if (current === 'pool' && countIn('b2') < 2) newLoc = 'b2';
+        else if ((current === 'pool' || current === 'b2') && countIn('b3') < 3) newLoc = 'b3';
+        else newLoc = 'pool';
+      } else {
+        const inRect = (ref) => {
+          if (!ref.current) return false;
+          const r = ref.current.getBoundingClientRect();
+          return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+        };
+        const overB2 = inRect(block2Ref);
+        const overB3 = inRect(block3Ref);
+        newLoc = 'pool';
+        if (overB2 && countIn('b2') < 2) newLoc = 'b2';
+        else if (overB3 && countIn('b3') < 3) newLoc = 'b3';
+        else if (overB2 || overB3) newLoc = locs[code];
+      }
       locs[code] = newLoc;
       setLocations(locs);
       setDragging(null);
@@ -126,7 +141,7 @@ export default function ParticipantFlow({ session, onOpenAdminGate }) {
 
   const startDrag = (code, e) => {
     e.preventDefault();
-    setDragging({ code, x: e.clientX, y: e.clientY });
+    setDragging({ code, x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY });
   };
 
   const poolCodes = codes.filter((c) => (locations[c] ?? 'pool') === 'pool');
@@ -241,7 +256,7 @@ export default function ParticipantFlow({ session, onOpenAdminGate }) {
           <div style={{ paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center', textAlign: 'center' }}>
             <span className="tag tag-accent">Regroupement</span>
             <h2 style={{ margin: '10px 0 2px' }}>Classez les échantillons en 2 groupes</h2>
-            <p style={{ margin: '0 0 10px', fontSize: 14, opacity: 0.7 }}>Faites glisser chaque code vers un bloc, selon leur ressemblance perçue.</p>
+            <p style={{ margin: '0 0 10px', fontSize: 14, opacity: 0.7 }}>Touchez ou faites glisser chaque code vers un bloc, selon leur ressemblance perçue.</p>
             <div ref={poolRef} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10, minHeight: 56, width: '100%' }}>
               {poolCodes.map(renderChip)}
             </div>
